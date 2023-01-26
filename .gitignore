@@ -1,0 +1,14 @@
+/ConsoleAppSampleCosmoDB/.vs/
+/ConsoleAppSampleCosmoDB/ConsoleAppSampleCosmoDB/bin/
+/ConsoleAppSampleCosmoDB/ConsoleAppSampleCosmoDB/obj/
+/FunctionIoTHub/.vs/
+/FunctionIoTHub/FunctionServiceBusTests/obj/
+/FunctionIoTHub/FunctionServiceBusTests/bin/
+/IoTClient/.vs/
+/IoTClient/ConsoleApp1/bin/
+/serviceBusConsole/.vs/
+/IoTClient/ConsoleApp1/obj/
+/serviceBusConsole/serviceBusConsole/bin/
+/serviceBusConsole/serviceBusConsole/obj/
+/serviceBusConsole/QueueReceiver/bin/
+/serviceBusConsole/QueueReceiver/obj/

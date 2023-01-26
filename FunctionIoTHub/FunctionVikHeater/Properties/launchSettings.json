@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "FunctionVikHeater": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7018\r\n",
+      "environmentVariables": {
+        "APP_TriggerSchedule": "0 */1 * * * *"
+      }
+    }
+  }
+}
