@@ -14,10 +14,13 @@ namespace FunctionServiceBus
     public class Function1
     {
         private readonly ILogger _logger;
+        private readonly IDatabaseService _databaseService;
 
-        public Function1(ILoggerFactory loggerFactory)
+        public Function1(ILoggerFactory loggerFactory, IDatabaseService databaseService)
         {
             _logger = loggerFactory.CreateLogger<Function1>();
+            _databaseService = databaseService;
+          
         }
 
         [Function("Function1")]
@@ -29,7 +32,7 @@ namespace FunctionServiceBus
         string messageId,
         ILogger log)
         {
-            _logger.LogInformation($"C# ServiceBus queue trigger function processed message: {myQueueItem}");
+            _logger.LogInformation($"C# 2.0 ServiceBus queue trigger function processed message: {myQueueItem}");
 
 
             if (myQueueItem.Contains("TopeniObejvak"))
@@ -37,31 +40,11 @@ namespace FunctionServiceBus
 
                 try
                 {
-                    using CosmosClient client = new CosmosClient("https://cosmodbvik.documents.azure.com:443/", "mKeThz76XaBf3nlggKpAGcYxD3ZStG3EeZujqGXrLCiWeK2tMJ59ZopcbJLhaTHLuTSQ57WL3HkaACDbJJsiuQ==");
-                    Database database = await client.CreateDatabaseIfNotExistsAsync("devicesDB");
 
-                    Microsoft.Azure.Cosmos.Container container = await database.CreateContainerIfNotExistsAsync(
-                        id: "devicesDB",
-                        partitionKeyPath: "/devicesData",
-                        //partitionKeyPath: "/categoryId",
-                        throughput: 400
-                    );
-
-                    //DeviceData newData = new(
-                    //categoryId: "61dba35b-4f02-45c5-b648-c6badc0cbd79",
-                    //categoryName: "temperature",
-                    //nameDevice: "TopeniObejvak",
-                    //temperature:250,
-                    //eventTime: new DateTime()
-                    //);
-                    String categoryId = "61dba35b-4f02-45c5-b648-c6badc0cbd79";//"61dba35b-4f02-45c5-b648-c6badc0cbd79";
+                    String categoryId = "61dba35b-4f02-45c5-b648-c6badc0cbd79";
                     String categoryName = "temperature";
-
                     DeviceData _deviceData = ParseData(myQueueItem, categoryId, categoryName);
-                    var createdItem = await container.CreateItemAsync<DeviceData>(
-                        item: _deviceData,
-                        partitionKey: new PartitionKey("61dba35b-4f02-45c5-b648-c6badc0cbd79")
-                    );
+                    await _databaseService.InsertDeviceData(_deviceData);
                 }
                 catch (Exception ex)
                 {
