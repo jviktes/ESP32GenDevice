@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
+using System.Linq;
 using System.Net.Http.Headers;
 using Azure;
 using Azure.Storage.Blobs;
@@ -35,13 +36,49 @@ namespace FunctionServiceBus
             _logger.LogInformation($"C# 2.0 ServiceBus queue trigger function processed message: {myQueueItem}");
 
 
+            if (myQueueItem.Contains("messageId") && myQueueItem.Contains("Temperature") && myQueueItem.Contains("Humidity"))
+            {
+
+                try
+                {
+
+                    JObject jsonMessage = JObject.Parse(myQueueItem);
+
+                    String deviceId = "esp32Temperature";
+                    String temperature = jsonMessage["Temperature"].ToString();
+                    String humidity = jsonMessage["Humidity"].ToString();
+                    String categoryId = "devices";//"61dba35b-4f02-45c5-b648-c6badc0cbd79";
+                    String categoryName = "temperature";
+
+                    double _temperature = 0;
+                    double.TryParse(temperature, out _temperature);
+
+                    double _humidity = 0;
+                    double.TryParse(humidity, out _humidity);
+
+                    DateTime _eventTime = DateTime.Now;
+                    //DateTime.TryParse(eventString, out _eventTime);
+
+                    DeviceData deviceData = new DeviceData() { id = Guid.NewGuid().ToString(), nameDevice = deviceId, devicesData = categoryId, categoryName = categoryName, temperature = _temperature,huminidy=_humidity, eventTime = _eventTime };
+                    await _databaseService.InsertDeviceData(deviceData);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogInformation($"exception: {ex.Message}");
+                    //throw;
+                }
+
+            }
+
+         
+
             if (myQueueItem.Contains("TopeniObejvak"))
             {
 
                 try
                 {
 
-                    String categoryId = "61dba35b-4f02-45c5-b648-c6badc0cbd79";
+                    String categoryId = "devices";//"61dba35b-4f02-45c5-b648-c6badc0cbd79";
                     String categoryName = "temperature";
                     DeviceData _deviceData = ParseData(myQueueItem, categoryId, categoryName);
                     await _databaseService.InsertDeviceData(_deviceData);
@@ -87,7 +124,8 @@ namespace FunctionServiceBus
         public string devicesData { get; set; }
         public string categoryName { get; set; }
         public string nameDevice { get; set; }
-        public int temperature { get; set; }
+        public double temperature { get; set; }
+        public double huminidy { get; set; }
         public DateTime eventTime { get; set; }
     }
 

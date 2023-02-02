@@ -11,7 +11,7 @@ namespace FunctionServiceBus.Tests
     [TestClass()]
     public class Function1Tests
     {
-        public String categoryId = "61dba35b-4f02-45c5-b648-c6badc0cbd79";
+        public String categoryId = "devices";
         public String categoryName = "temperature";
 
         [TestMethod()]
