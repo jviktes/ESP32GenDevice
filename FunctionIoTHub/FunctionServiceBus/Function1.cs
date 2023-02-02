@@ -44,7 +44,8 @@ namespace FunctionServiceBus
 
                     JObject jsonMessage = JObject.Parse(myQueueItem);
 
-                    String deviceId = "esp32Temperature";
+                    //String deviceId = "esp32Temperature";
+                    String deviceId = jsonMessage["deviceId"].ToString();
                     String temperature = jsonMessage["Temperature"].ToString();
                     String humidity = jsonMessage["Humidity"].ToString();
                     String categoryId = "devices";//"61dba35b-4f02-45c5-b648-c6badc0cbd79";

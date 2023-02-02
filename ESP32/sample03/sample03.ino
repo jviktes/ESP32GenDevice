@@ -4,7 +4,7 @@
 
 #include <WiFi.h>
 #include "Esp32MQTTClient.h"
-
+#include "DHT.h"
 #define INTERVAL 10000
 #define MESSAGE_MAX_LEN 256
 // Please input the SSID and password of WiFi
@@ -15,12 +15,17 @@ const char* password = ".MoNitor2?";
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
 static const char* connectionString = "HostName=vikhub.azure-devices.net;DeviceId=esp32Temperature;SharedAccessSignature=SharedAccessSignature sr=vikhub.azure-devices.net%2Fdevices%2Fesp32Temperature&sig=dKldWv8IT9zPKp5VNB1P%2B4htBG2ebxs3Zak3Zmb2Qp0%3D&se=23275368339";
-const char *messageData = "{\"messageId\":%d, \"Temperature\":%f, \"Humidity\":%f}";
+const char *messageData = "{\"deviceId\":\"esp32Temperature\", \"messageId\":%d, \"Temperature\":%f, \"Humidity\":%f}";
 static bool hasIoTHub = false;
 static bool hasWifi = false;
 int messageCount = 1;
 static bool messageSending = true;
 static uint64_t send_interval_ms;
+
+//DHT SENZOR: 
+#define pinDHT 13
+#define typDHT11 DHT11
+DHT temperatureSensor(pinDHT, typDHT11);
 
 static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result)
 {
@@ -128,7 +133,7 @@ if (hasWifi && hasIoTHub)
       // Send teperature data
       char messagePayload[MESSAGE_MAX_LEN];
       float temperature = (float)random(0,500)/10;
-      float humidity = (float)random(0, 1000)/10;
+      float humidity  = getHuminidy();//(float)random(0, 1000)/10;
       snprintf(messagePayload, MESSAGE_MAX_LEN, messageData, messageCount++, temperature, humidity);
       Serial.println(messagePayload);
       EVENT_INSTANCE* message = Esp32MQTTClient_Event_Generate(messagePayload, MESSAGE);
@@ -141,4 +146,18 @@ if (hasWifi && hasIoTHub)
     }
   }
   delay(10);
+}
+
+float getHuminidy() {
+    float _vlhkost = 0;
+    _vlhkost = temperatureSensor.readHumidity();
+    if (isnan(_vlhkost)) {
+       
+        Serial.println("Chyba pri cteni vlhkosti z DHT senzoru!");
+    }
+    else {
+        Serial.println("Vlhkost: " + String(_vlhkost) + " %");
+    }
+
+    return _vlhkost;
 }
