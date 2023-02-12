@@ -46,8 +46,13 @@ namespace FunctionServiceBus
 
                     //String deviceId = "esp32Temperature";
                     String deviceId = jsonMessage["deviceId"].ToString();
+
                     String temperature = jsonMessage["Temperature"].ToString();
                     String humidity = jsonMessage["Humidity"].ToString();
+                    String light = jsonMessage["Light"].ToString();
+                    String temperatureBMP = jsonMessage["TemperatureBMP"].ToString();
+                    String pressure = jsonMessage["Pressure"].ToString();
+
                     String categoryId = "devices";//"61dba35b-4f02-45c5-b648-c6badc0cbd79";
                     String categoryName = "temperature";
 
@@ -57,10 +62,26 @@ namespace FunctionServiceBus
                     double _humidity = 0;
                     double.TryParse(humidity, out _humidity);
 
+                    double _light = 0;
+                    double.TryParse(light, out _light);
+
+                    double _temperatureBMP = 0;
+                    double.TryParse(temperatureBMP, out _temperatureBMP);
+
+                    double _pressure = 0;
+                    double.TryParse(pressure, out _pressure);
+
                     DateTime _eventTime = DateTime.Now;
                     //DateTime.TryParse(eventString, out _eventTime);
 
-                    DeviceData deviceData = new DeviceData() { id = Guid.NewGuid().ToString(), nameDevice = deviceId, devicesData = categoryId, categoryName = categoryName, temperature = _temperature,huminidy=_humidity, eventTime = _eventTime };
+                    DeviceData deviceData = new DeviceData() { id = Guid.NewGuid().ToString(),
+                        nameDevice = deviceId, devicesData = categoryId, categoryName = categoryName, 
+                        temperature = _temperature,
+                        huminidy=_humidity,
+                        light = _light,
+                        temperatureBMP = _temperatureBMP,
+                        pressure = _pressure,
+                        eventTime = _eventTime };
                     await _databaseService.InsertDeviceData(deviceData);
                 }
                 catch (Exception ex)
@@ -112,7 +133,10 @@ namespace FunctionServiceBus
             DateTime _eventTime = DateTime.Now;
             //DateTime.TryParse(eventString, out _eventTime);
 
-            DeviceData deviceData = new DeviceData(){ id=Guid.NewGuid().ToString(), nameDevice = deviceId, devicesData = categoryId , categoryName= categoryName, temperature= _temperature, eventTime= _eventTime };
+            DeviceData deviceData = new DeviceData(){ id=Guid.NewGuid().ToString(), nameDevice = deviceId, 
+                devicesData = categoryId , categoryName= categoryName, 
+                temperature= _temperature,
+                eventTime= _eventTime };
             return deviceData;
         }
     }
@@ -127,6 +151,11 @@ namespace FunctionServiceBus
         public string nameDevice { get; set; }
         public double temperature { get; set; }
         public double huminidy { get; set; }
+        public double light { get; set; }
+
+        public double temperatureBMP { get; set; }
+
+        public double pressure { get; set; }
         public DateTime eventTime { get; set; }
     }
 
