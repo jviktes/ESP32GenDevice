@@ -48,8 +48,7 @@ namespace ConsoleApp1
 
         public async Task<bool> SendingDataLoop()
         {
-            Random random = new Random();
-            int messageId = 0;
+
             while (true)
             {
 

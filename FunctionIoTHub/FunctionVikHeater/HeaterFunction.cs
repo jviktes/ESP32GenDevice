@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Web;
+using IoTLibrary;
 
 namespace FunctionVikHeater
 {
@@ -60,11 +61,38 @@ namespace FunctionVikHeater
                 }
             }
 
+
             var telemetryDataPoint = new
             {
                 deviceId = deviceId,
                 temperature = temmperatureHeater,
             };
+
+            MessageIoT messageIoT = new MessageIoT();
+            messageIoT.id = Guid.NewGuid().ToString();
+            messageIoT.MessageDate = DateTime.Now;
+            messageIoT.DeviceId = deviceId;
+
+            List<IoTLibrary.Data> dataTelemetry = new List<IoTLibrary.Data>()
+                {
+                    new IoTLibrary.Data() { Name = "temperature", Value = temmperatureHeater },
+                };
+
+            messageIoT.MessageData = new MessageData() { IdMessage = messageIoT.id, DataSet = dataTelemetry };
+
+            messageIoT.CategoryName = deviceId;
+
+            //List<IoTLibrary.Data> dataDevice = new List<IoTLibrary.Data>()
+            //    {
+            //        new IoTLibrary.Data() { Name = "voltage", Value = "99" },
+            //        new IoTLibrary.Data() { Name = "batery", Value = "1025" },
+            //        new IoTLibrary.Data() { Name = "version", Value = "87.4578" },
+
+            //    };
+
+            messageIoT.DeviceData = new DeviceData() { nameDevice = "Danfoss v obyvacim pokoji", DeviceId = deviceId };
+
+
 
             string messageString = JsonConvert.SerializeObject(telemetryDataPoint);
             return messageString;

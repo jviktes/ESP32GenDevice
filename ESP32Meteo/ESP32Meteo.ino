@@ -1,12 +1,12 @@
 /**
- * A simple Azure IoT example for sending telemetry to Iot Hub.
- */
+   A simple Azure IoT example for sending telemetry to Iot Hub.
+*/
 
 #include <WiFi.h>
 #include "Esp32MQTTClient.h"
 #include "DHT.h"
 #define INTERVAL 10000
-#define MESSAGE_MAX_LEN 256
+#define MESSAGE_MAX_LEN 512
 // Please input the SSID and password of WiFi
 const char* ssid = "dlink";
 const char* password = ".MoNitor2?";
@@ -15,14 +15,17 @@ const char* password = ".MoNitor2?";
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
 static const char* connectionString = "HostName=vikhub.azure-devices.net;DeviceId=esp32Temperature;SharedAccessSignature=SharedAccessSignature sr=vikhub.azure-devices.net%2Fdevices%2Fesp32Temperature&sig=dKldWv8IT9zPKp5VNB1P%2B4htBG2ebxs3Zak3Zmb2Qp0%3D&se=23275368339";
-const char *messageData = "{\"deviceId\":\"esp32Temperature\", \"messageId\":%d, \"Temperature\":%f, \"Humidity\":%f, \"Light\":%d, \"TemperatureBMP\":%f,\"Pressure\":%f}";
+//const char *messageData = "{\"deviceId\":\"esp32Temperature\", \"messageId\":%d, \"Temperature\":%f, \"Humidity\":%f, \"Light\":%d, \"TemperatureBMP\":%f,\"Pressure\":%f}";
+
+const char *messageData = "{\"Id\":\"messageGuid\", \"MessageData\":{\"IdMessage\":\"messageGuid\",\"DataSet\":[{\"Name\":\"huminidy\",\"Value\":%f},{\"Name\":\"light\",\"Value\":%d},{\"Name\":\"pressure\",\"Value\":%f},{\"Name\":\"temperature\",\"Value\":%f},{\"Name\":\"temperatureBMP\",\"Value\":%f}]},\"DeviceId\":\"esp32Temperature\",\"DeviceData\":{\"nameDevice\":\"ESP32 meteostanice\",\"DeviceId\":\"esp32Temperature\",\"DataSet\":[{\"Name\":\"voltage\",\"Value\":%f}]},\"CategoryName\":\"esp32Temperature\"}";
+
 static bool hasIoTHub = false;
 static bool hasWifi = false;
 int messageCount = 1;
 static bool messageSending = true;
 static uint64_t send_interval_ms;
 
-//DHT SENSOR: 
+//DHT SENSOR:
 #define pinDHT 13
 #define typDHT11 DHT11
 DHT temperatureSensor(pinDHT, typDHT11);
@@ -105,7 +108,7 @@ void setup() {
     hasWifi = false;
   }
   hasWifi = true;
-  
+
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
@@ -128,20 +131,22 @@ void setup() {
 }
 
 void loop() {
-if (hasWifi && hasIoTHub)
+  if (hasWifi && hasIoTHub)
   {
-    if (messageSending && 
+    if (messageSending &&
         (int)(millis() - send_interval_ms) >= INTERVAL)
     {
       // Send teperature data
       char messagePayload[MESSAGE_MAX_LEN];
       float temperature = getTemperatureDHT();//(float)random(0,500)/10;
       float humidity  = getHuminidy();//(float)random(0, 1000)/10;
-      int light = getLightIntensity(); 
+      int light = getLightIntensity();
       float temperatureBMP = getTemperatureBMP280();
       float pressure = getPressureBMP280();
-      //Format: "{\"deviceId\":\"esp32Temperature\", \"messageId\":%d, \"Temperature\":%f, \"Humidity\":%f, \"Light\":%d, \"TemperatureBMP\":%f,\"Pressure\":%f}";
-      snprintf(messagePayload, MESSAGE_MAX_LEN, messageData, messageCount++, temperature, humidity,light,temperatureBMP,pressure);
+      char * MessageDate = {"2023-02-12T14:54:38.8732099+01:00"};
+      float voltage = (float)random(0, 1000) / 10;
+      //Format: huminidy, light,pressure, temperature, temperatureBMP, voltage, MessageDate
+      snprintf(messagePayload, MESSAGE_MAX_LEN, messageData, messageCount++, humidity, light, pressure, temperature, temperatureBMP, voltage);
       Serial.println(messagePayload);
       EVENT_INSTANCE* message = Esp32MQTTClient_Event_Generate(messagePayload, MESSAGE);
       Esp32MQTTClient_SendEventInstance(message);
@@ -156,51 +161,51 @@ if (hasWifi && hasIoTHub)
 }
 
 float getHuminidy() {
-    float _vlhkost = 0;
-    _vlhkost = temperatureSensor.readHumidity();
-    if (isnan(_vlhkost)) {
-       
-        Serial.println("Chyba pri cteni vlhkosti z DHT senzoru!");
-    }
-    else {
-        Serial.println("Vlhkost: " + String(_vlhkost) + " %");
-    }
+  float _vlhkost = 0;
+  _vlhkost = temperatureSensor.readHumidity();
+  if (isnan(_vlhkost)) {
 
-    return _vlhkost;
+    Serial.println("Chyba pri cteni vlhkosti z DHT senzoru!");
+  }
+  else {
+    Serial.println("Vlhkost: " + String(_vlhkost) + " %");
+  }
+
+  return _vlhkost;
 }
 
 float getTemperatureDHT() {
-    //Serial.println("DHT readTemperature");
-    float _vnitrniTeplota = 0;
-    _vnitrniTeplota = temperatureSensor.readTemperature();
-    
-    if (isnan(_vnitrniTeplota)) {
+  //Serial.println("DHT readTemperature");
+  float _vnitrniTeplota = 0;
+  _vnitrniTeplota = temperatureSensor.readTemperature();
 
-        Serial.println("Chyba pri cteni teploty z DHT senzoru!");
-    }
-    else {
-        Serial.println("DHT teplota:  " + String(_vnitrniTeplota) + ".");
-    }
+  if (isnan(_vnitrniTeplota)) {
 
-    return _vnitrniTeplota;
+    Serial.println("Chyba pri cteni teploty z DHT senzoru!");
+  }
+  else {
+    Serial.println("DHT teplota:  " + String(_vnitrniTeplota) + ".");
+  }
+
+  return _vnitrniTeplota;
 }
 
 int getLightIntensity() {
-  
+
   int lightInt = analogRead(pResistor);
-  Serial.println("LightIntensity:"+String(lightInt));
+  Serial.println("LightIntensity:" + String(lightInt));
   return lightInt;
 }
 
 float getTemperatureBMP280() {
-    float _venkovniTeplota = (float)random(0, 1000)/10;//bmp.readTemperature();
-    Serial.println("bmpTeplota:"+String(_venkovniTeplota));
-    return  _venkovniTeplota;
+  float _venkovniTeplota = (float)random(0, 1000) / 10; //bmp.readTemperature();
+  Serial.println("bmpTeplota:" + String(_venkovniTeplota));
+  return  _venkovniTeplota;
 }
 
 float getPressureBMP280() {
-    Serial.println("Tlak:");
-    float _venkovniTlak = (float)random(0, 1000)/10;//(bmp.readPressure() / 100.00);
-    Serial.println("Tlak:" + String(_venkovniTlak));
-    return  _venkovniTlak;
+  //Serial.println("Tlak:");
+  float _venkovniTlak = (float)random(0, 1000) / 10; //(bmp.readPressure() / 100.00);
+  Serial.println("Tlak:" + String(_venkovniTlak));
+  return  _venkovniTlak;
 }

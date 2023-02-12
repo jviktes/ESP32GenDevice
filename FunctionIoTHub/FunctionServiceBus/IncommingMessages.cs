@@ -36,7 +36,7 @@ namespace FunctionServiceBus
         ILogger log)
         {
             _logger.LogInformation($"IncommingMessages v3.0 ServiceBus queue trigger function processed message: {myQueueItem}");
-
+            var tt = JsonSerializer.Deserialize<object>(myQueueItem);
             MessageIoT? messageIoT;
             
             try
