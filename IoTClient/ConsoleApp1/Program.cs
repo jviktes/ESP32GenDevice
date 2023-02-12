@@ -6,8 +6,8 @@ using System.Text;
 
 Console.WriteLine("Hello, World!");
 
-IotDevice iotDevice = new IotDevice();
-
+//IotDevice iotDevice = new IotDevice();
 //IotHeater IotHeater = new IotHeater();
+IoTMessage2 iotDevice = new IoTMessage2();
 
 Console.ReadLine();

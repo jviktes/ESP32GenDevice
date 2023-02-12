@@ -12,3 +12,8 @@
 /serviceBusConsole/serviceBusConsole/obj/
 /serviceBusConsole/QueueReceiver/bin/
 /serviceBusConsole/QueueReceiver/obj/
+/IoTLibrary/IoTLibrary/obj/Debug/net7.0
+/IoTLibrary/IoTLibrary/obj
+/IoTLibrary/IoTLibrary/bin/Debug/net7.0
+/IoTLibrary/.vs
+/IoTLibrary/.vs/

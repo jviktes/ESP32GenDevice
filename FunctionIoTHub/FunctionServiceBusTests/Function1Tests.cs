@@ -19,7 +19,7 @@ namespace FunctionServiceBus.Tests
         {
             String test1 = "{\"deviceId\":\"TopeniObejvak\",\"temperature\":\"244\"}";
 
-            DeviceData deviceData = Function1.ParseData(test1, categoryId, categoryName);
+            //MessageIoT deviceData = IncommingMessages.ParseData(test1, categoryId, categoryName);
 
 
             Assert.Fail();
