@@ -47,7 +47,7 @@ namespace IoTServices
 
                 var rslt = new List<object>();
 
-                String queryString = @"SELECT c.id,c.DeviceId,c.MessageData,c.MessageDate FROM c WHERE c.DeviceId= 'TopeniObejvak'";
+            String queryString = @"SELECT c.id,c.DeviceId,c.MessageData,c.MessageDate FROM c WHERE c.DeviceId = 'TopeniObejvak'";
 
                 var query = new QueryDefinition(queryString);
                 //    .WithParameter("@batchSize", this._config.BatchSizeNotUpdatedDetailedTeamsData)

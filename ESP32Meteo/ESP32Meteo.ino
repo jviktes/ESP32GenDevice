@@ -8,7 +8,7 @@
 #include "Esp32MQTTClient.h"
 #include "DHT.h"
 #define INTERVAL 10000
-#define MESSAGE_MAX_LEN 512
+#define MESSAGE_MAX_LEN 1024
 // Please input the SSID and password of WiFi
 const char* ssid = "dlink";
 const char* password = ".MoNitor2?";
@@ -19,7 +19,7 @@ const char* password = ".MoNitor2?";
 static const char* connectionString = "HostName=vikhub.azure-devices.net;DeviceId=esp32Temperature;SharedAccessSignature=SharedAccessSignature sr=vikhub.azure-devices.net%2Fdevices%2Fesp32Temperature&sig=dKldWv8IT9zPKp5VNB1P%2B4htBG2ebxs3Zak3Zmb2Qp0%3D&se=23275368339";
 //const char *messageData = "{\"deviceId\":\"esp32Temperature\", \"messageId\":%d, \"Temperature\":%f, \"Humidity\":%f, \"Light\":%d, \"TemperatureBMP\":%f,\"Pressure\":%f}";
 
-const char *messageData = "{\"Id\":\"%s\", \"MessageData\":{\"IdMessage\":\"%s\",\"DataSet\":[{\"Name\":\"huminidy\",\"Value\":%f},{\"Name\":\"light\",\"Value\":%d},{\"Name\":\"pressure\",\"Value\":%f},{\"Name\":\"temperature\",\"Value\":%f},{\"Name\":\"temperatureBMP\",\"Value\":%f}]},\"DeviceId\":\"esp32Temperature\",\"DeviceData\":{\"nameDevice\":\"ESP32 meteostanice\",\"DeviceId\":\"esp32Temperature\",\"DataSet\":[{\"Name\":\"voltage\",\"Value\":%f}]},\"CategoryName\":\"esp32Temperature\"}";
+const char *messageData = "{\"Id\":\"%s\", \"MessageData\":{\"IdMessage\":\"%s\",\"DataSet\":[{\"Name\":\"huminidy\",\"Value\":\"%s\"},{\"Name\":\"light\",\"Value\":\"%s\"},{\"Name\":\"pressure\",\"Value\":\"%s\"},{\"Name\":\"temperature\",\"Value\":\"%s\"},{\"Name\":\"temperatureBMP\",\"Value\":\"%s\"}]},\"DeviceId\":\"esp32Temperature\",\"DeviceData\":{\"nameDevice\":\"ESP32 meteostanice\",\"DeviceId\":\"esp32Temperature\",\"DataSet\":[{\"Name\":\"voltage\",\"Value\":\"%s\"}]},\"MessageDate\":\"%s\"}";
 
 static bool hasIoTHub = false;
 static bool hasWifi = false;
@@ -145,7 +145,7 @@ void loop() {
       int light = getLightIntensity();
       float temperatureBMP = getTemperatureBMP280();
       float pressure = getPressureBMP280();
-      char * MessageDate = {"2023-02-12T14:54:38.8732099+01:00"};
+      char * messageDate = {"2023-02-18T14:54:38.8732099+01:00"};
       float voltage = (float)random(0, 1000) / 10;
 
       UUID uuid;
@@ -156,13 +156,8 @@ void loop() {
     
       uuid.toCharArray();
       Serial.println(uuid);
-      //String myGuid = String(uuid);
-      //Serial.println(myGuid);
-      //Format: huminidy, light,pressure, temperature, temperatureBMP, voltage, MessageDate
-
-    //tady to pada!!!:
-      
-      snprintf(messagePayload, MESSAGE_MAX_LEN, messageData, uuid.toCharArray(),uuid.toCharArray(), humidity, light, pressure, temperature, temperatureBMP, voltage);
+ 
+      snprintf(messagePayload, MESSAGE_MAX_LEN, messageData, uuid.toCharArray(),uuid.toCharArray(), String(humidity), String(light), String(pressure), String(temperature), String(temperatureBMP), String(voltage),messageDate);
       Serial.println(messagePayload);
       EVENT_INSTANCE* message = Esp32MQTTClient_Event_Generate(messagePayload, MESSAGE);
       Esp32MQTTClient_SendEventInstance(message);

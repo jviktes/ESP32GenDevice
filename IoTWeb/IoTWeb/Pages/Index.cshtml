@@ -73,8 +73,8 @@
 
 
     function getJsonDataIoT() {
-        //var url="http://localhost:7116/api/GetIoTData?devidId=pokus";
-        var url = "https://getiotdatavik.azurewebsites.net/api/GetIoTData?code=Cyq5XKSIRkOkt-Ih6ZABBPHMvGq26Qg9DNe7ZcD8MAQTAzFuUF3uXQ==";
+        var url="http://localhost:7116/api/GetIoTData?devidId=pokus";
+        //var url = "https://getiotdatavik.azurewebsites.net/api/GetIoTData?code=Cyq5XKSIRkOkt-Ih6ZABBPHMvGq26Qg9DNe7ZcD8MAQTAzFuUF3uXQ==";
         $.ajax({
             dataType: "json",
             url: url,
@@ -103,6 +103,17 @@
             //    "MessageDate": "2023-02-12T19:49:47.6029829+01:00"
             //}
 
+
+            var objectWithGroupByName = {};
+            for (var key in data[0]) 
+            {
+                var name = data[0][key].DeviceId;
+                if (!objectWithGroupByName[name]) {
+                    objectWithGroupByName[name] = [];
+                }
+                objectWithGroupByName[name].push(data[0][key]);
+            }
+
             Object.entries(data[0]).forEach(entry => {
                 var _obj = entry[1]["MessageData"]["DataSet"][0];
                 var _temperature= _obj["Name"];
@@ -110,6 +121,7 @@
                 var _dateMessage = new Date(entry[1]["MessageDate"]);
                 dataForGoogle.push([_dateMessage, _value]);
             });
+
             var dataFormated = google.visualization.arrayToDataTable(dataForGoogle);
 
             var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));

@@ -13,6 +13,9 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using IoTServices;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace FunctionServiceBus
 {
@@ -46,8 +49,15 @@ namespace FunctionServiceBus
                 //messageIoT = JsonSerializer.Deserialize<MessageIoT>(myQueueItem);
 
                 //var sz = JsonConvert.SerializeObject(sampleGroupInstance);
+                //Unexpected character encountered while parsing value
+                var options = new JsonSerializerSettings { NullValueHandling= NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Include};
 
-                messageIoT=JsonConvert.DeserializeObject<MessageIoT>(myQueueItem);
+                //;
+                //{
+                //    NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals
+                //};
+
+                messageIoT =JsonConvert.DeserializeObject<MessageIoT>(myQueueItem, options);
 
                 //musi se podarit na parsovat:
                 if ((messageIoT.DeviceId!=null) || (messageIoT.id!=null)) {
