@@ -32,7 +32,6 @@ namespace GetIoTData
             var data = await _databaseService.GetData();
 
             String _data = JsonConvert.SerializeObject(data);
-            //response.WriteString("Welcome to Azure Functions!");
             response.WriteString(_data);
             return response;
         }

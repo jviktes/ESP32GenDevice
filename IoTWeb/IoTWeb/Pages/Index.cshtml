@@ -12,7 +12,7 @@
     google.charts.load('current', { 'packages': ['corechart'] });
 
     // Set a callback to run when the Google Visualization API is loaded.
-    google.charts.setOnLoadCallback(drawChartExample);
+    //google.charts.setOnLoadCallback(drawChartExample);
     //google.charts.setOnLoadCallback(drawChartIoTData);
 
     getJsonDataIoT();
@@ -73,8 +73,8 @@
 
 
     function getJsonDataIoT() {
-        var url="http://localhost:7116/api/GetIoTData?devidId=pokus";
-        //var url = "https://getiotdatavik.azurewebsites.net/api/GetIoTData?code=Cyq5XKSIRkOkt-Ih6ZABBPHMvGq26Qg9DNe7ZcD8MAQTAzFuUF3uXQ==";
+        //var url="http://localhost:7116/api/GetIoTData?devidId=pokus";
+        var url = "https://getiotdatavik.azurewebsites.net/api/GetIoTData?code=Cyq5XKSIRkOkt-Ih6ZABBPHMvGq26Qg9DNe7ZcD8MAQTAzFuUF3uXQ==";
         $.ajax({
             dataType: "json",
             url: url,
@@ -87,23 +87,22 @@
             dataForGoogle.push(['MessageDate', 'Temperature']);
 
 
-         
-                //{
-                //    "id": "76f63324-3efa-497f-928e-369a0a08b0ca",
-                //        "DeviceId": "TopeniObejvak",
-                //            "MessageData": {
-                //            "IdMessage": "76f63324-3efa-497f-928e-369a0a08b0ca",
-                //            "DataSet": [
-                //                {
-                //                    "Name": "temperature",
-                //                    "Value": "224"
-                //                }
-                //            ]
-                //    },
-                //    "MessageDate": "2023-02-12T19:49:47.6029829+01:00"
-                //}
+            //Example data:
+            //{
+            //    "id": "76f63324-3efa-497f-928e-369a0a08b0ca",
+            //        "DeviceId": "TopeniObejvak",
+            //            "MessageData": {
+            //            "IdMessage": "76f63324-3efa-497f-928e-369a0a08b0ca",
+            //            "DataSet": [
+            //                {
+            //                    "Name": "temperature",
+            //                    "Value": "224"
+            //                }
+            //            ]
+            //    },
+            //    "MessageDate": "2023-02-12T19:49:47.6029829+01:00"
+            //}
 
-            // Prints "name Jean-Luc Picard" followed by "rank Captain"
             Object.entries(data[0]).forEach(entry => {
                 var _obj = entry[1]["MessageData"]["DataSet"][0];
                 var _temperature= _obj["Name"];
@@ -116,7 +115,7 @@
             var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
 
             var options = {
-                title: 'Company Performance',
+                title: 'Temperature Topeni Obyvak',
                 curveType: 'function',
                 legend: { position: 'bottom' }
             };

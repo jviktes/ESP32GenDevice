@@ -7,21 +7,21 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 //allow cors (SPA use api):
-//builder.Services.AddCors(opt =>
-//{
-//    //opt.AddDefaultPolicy(builder =>
-//    //{
-//    //    builder.AllowAnyOrigin()
-//    //        .AllowAnyHeader()
-//    //        .AllowAnyMethod();
-//    //});
-//    opt.AddPolicy(name: MyAllowSpecificOrigins,
-//                      policy =>
-//                      {
-//                          policy.WithOrigins("https://getiotdatavik.azurewebsites.net",
-//                                              "http://www.contoso.com");
-//                      });
-//});
+builder.Services.AddCors(opt =>
+{
+    opt.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+    //opt.AddPolicy(name: MyAllowSpecificOrigins,
+    //                  policy =>
+    //                  {
+    //                      policy.WithOrigins("https://getiotdatavik.azurewebsites.net",
+    //                                          "http://www.contoso.com");
+    //                  });
+});
 
 var app = builder.Build();
 
@@ -37,9 +37,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-//app.UseCors();
-app.UseAuthorization();
 
+app.UseAuthorization();
+app.UseCors();
 app.MapRazorPages();
 
 app.Run();
