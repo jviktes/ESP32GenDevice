@@ -13,6 +13,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FunctionServiceBusTests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IoTLibrary", "..\IoTLibrary\IoTLibrary\IoTLibrary.csproj", "{E4480C01-E56C-46D4-BA06-0DAA14249FDA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetIoTData", "GetIoTData\GetIoTData.csproj", "{87B89E86-27DD-4675-8E02-5AD9ED6E57D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoTServices", "Services\IoTServices.csproj", "{5F023166-8A7B-464C-88B2-BB7960F8CD47}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{E4480C01-E56C-46D4-BA06-0DAA14249FDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4480C01-E56C-46D4-BA06-0DAA14249FDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4480C01-E56C-46D4-BA06-0DAA14249FDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87B89E86-27DD-4675-8E02-5AD9ED6E57D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87B89E86-27DD-4675-8E02-5AD9ED6E57D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87B89E86-27DD-4675-8E02-5AD9ED6E57D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87B89E86-27DD-4675-8E02-5AD9ED6E57D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F023166-8A7B-464C-88B2-BB7960F8CD47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F023166-8A7B-464C-88B2-BB7960F8CD47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F023166-8A7B-464C-88B2-BB7960F8CD47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F023166-8A7B-464C-88B2-BB7960F8CD47}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3,14 +3,16 @@ using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http.Headers;
-using System.Text.Json;
+//using System.Text.Json;
 using Azure;
 using Azure.Storage.Blobs;
 using IoTLibrary;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using IoTServices;
 
 namespace FunctionServiceBus
 {
@@ -36,12 +38,17 @@ namespace FunctionServiceBus
         ILogger log)
         {
             _logger.LogInformation($"IncommingMessages v3.0 ServiceBus queue trigger function processed message: {myQueueItem}");
-            var tt = JsonSerializer.Deserialize<object>(myQueueItem);
+            //var tt = JsonSerializer.Deserialize<object>(myQueueItem);
             MessageIoT? messageIoT;
             
             try
             {
-                messageIoT = JsonSerializer.Deserialize<MessageIoT>(myQueueItem);
+                //messageIoT = JsonSerializer.Deserialize<MessageIoT>(myQueueItem);
+
+                //var sz = JsonConvert.SerializeObject(sampleGroupInstance);
+
+                messageIoT=JsonConvert.DeserializeObject<MessageIoT>(myQueueItem);
+
                 //musi se podarit na parsovat:
                 if ((messageIoT.DeviceId!=null) || (messageIoT.id!=null)) {
                     await _databaseService.InsertDeviceData(messageIoT);

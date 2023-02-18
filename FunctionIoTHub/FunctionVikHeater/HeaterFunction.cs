@@ -25,22 +25,24 @@ namespace FunctionVikHeater
             _logger = loggerFactory.CreateLogger<HeaterFunction>();
         }
 
-        [Function("HeaterFunction")]
+        [Function("HeaterFunctionV2")]
         public  async Task Run([Microsoft.Azure.Functions.Worker.TimerTrigger("%APP_TriggerSchedule%")] MyInfo myTimer)
         {
-            _logger.LogInformation($"HeaterFunction trigger executed at: {DateTime.Now}");
+            _logger.LogInformation($"HeaterFunctionV2 trigger executed at: {DateTime.Now}");
 
             var deviceAuthentication = new DeviceAuthenticationWithRegistrySymmetricKey(deviceId, deviceKey);
             DeviceClient deviceClient = DeviceClient.Create(iotHubHostName, deviceAuthentication, TransportType.Mqtt);
 
             string responseString = await ProcessRequestToDanfassAPI();
+            _logger.LogInformation($"HeaterFunctionV2 responseString: {responseString}");
+
 
             string messageString = PrepeareTelemetryData(deviceId, responseString);
-
-            _logger.LogInformation(messageString);
+            _logger.LogInformation($"HeaterFunctionV2 messageString: {messageString}");
 
             Message message = new Message(Encoding.ASCII.GetBytes(messageString));
             await deviceClient.SendEventAsync(message);
+
 
         }
 
@@ -61,13 +63,6 @@ namespace FunctionVikHeater
                 }
             }
 
-
-            var telemetryDataPoint = new
-            {
-                deviceId = deviceId,
-                temperature = temmperatureHeater,
-            };
-
             MessageIoT messageIoT = new MessageIoT();
             messageIoT.id = Guid.NewGuid().ToString();
             messageIoT.MessageDate = DateTime.Now;
@@ -81,20 +76,9 @@ namespace FunctionVikHeater
             messageIoT.MessageData = new MessageData() { IdMessage = messageIoT.id, DataSet = dataTelemetry };
 
             messageIoT.CategoryName = deviceId;
-
-            //List<IoTLibrary.Data> dataDevice = new List<IoTLibrary.Data>()
-            //    {
-            //        new IoTLibrary.Data() { Name = "voltage", Value = "99" },
-            //        new IoTLibrary.Data() { Name = "batery", Value = "1025" },
-            //        new IoTLibrary.Data() { Name = "version", Value = "87.4578" },
-
-            //    };
-
             messageIoT.DeviceData = new DeviceData() { nameDevice = "Danfoss v obyvacim pokoji", DeviceId = deviceId };
 
-
-
-            string messageString = JsonConvert.SerializeObject(telemetryDataPoint);
+            string messageString = JsonConvert.SerializeObject(messageIoT);
             return messageString;
 
         }

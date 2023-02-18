@@ -18,3 +18,8 @@
 /IoTLibrary/.vs
 /IoTLibrary/.vs/
 /IoTLibrary/IoTLibrary/bin/Release/net7.0
+/FunctionIoTHub/Services/bin/Debug/net7.0
+/FunctionIoTHub/Services/bin/Release/net7.0
+/FunctionIoTHub/Services/obj/Debug/net7.0
+/FunctionIoTHub/Services/obj
+/IoTWeb/IoTWeb/obj/Debug/net7.0
