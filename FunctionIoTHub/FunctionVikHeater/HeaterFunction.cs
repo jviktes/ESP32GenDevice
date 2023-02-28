@@ -63,6 +63,14 @@ namespace FunctionVikHeater
                 }
             }
 
+            //Fixing values: 
+            float innTemmperatureHeater = 0;
+            if (float.TryParse(temmperatureHeater, out innTemmperatureHeater))
+            {
+                innTemmperatureHeater = innTemmperatureHeater / 10;
+                temmperatureHeater = innTemmperatureHeater.ToString();
+            }
+
             MessageIoT messageIoT = new MessageIoT();
             messageIoT.id = Guid.NewGuid().ToString();
             messageIoT.MessageDate = DateTime.Now;

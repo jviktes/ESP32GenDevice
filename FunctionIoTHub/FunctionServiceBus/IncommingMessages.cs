@@ -62,6 +62,9 @@ namespace FunctionServiceBus
                     }
 
                     ValidationPartionKey(messageIoT);
+                   
+                    //
+
 
                     await _databaseService.InsertDeviceData(messageIoT);
                 }
@@ -78,6 +81,8 @@ namespace FunctionServiceBus
             }
 
         }
+
+
 
         private static void ValidationPartionKey(MessageIoT? messageIoT)
         {

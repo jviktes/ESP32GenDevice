@@ -9,7 +9,7 @@
 #include <WiFi.h>
 #include "Esp32MQTTClient.h"
 #include "DHT.h"
-#define INTERVAL 900000//10000 = 10s 60000 = 1 miuta
+#define INTERVAL 900000 //1200000//10000 = 10s 60000 = 1 minuta
 #define MESSAGE_MAX_LEN 1024
 // Please input the SSID and password of WiFi
 const char* ssid = "dlink";
@@ -146,11 +146,11 @@ void setup() {
   //init time:
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
-  bool status = bmp.begin(BMP280_ADRESA);;
-  if (!status) {
+  bool statusBmpSensor = bmp.begin(BMP280_ADRESA);;
+  if (!statusBmpSensor) {
     Serial.println("Could not find a valid BMP280 sensor, check wiring!");
   }
-
+  Serial.println("Setup completed.");
 }
 
 

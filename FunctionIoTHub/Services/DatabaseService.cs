@@ -1,9 +1,10 @@
 ﻿using IoTLibrary;
 using Microsoft.Azure.Cosmos;
 using System.Collections.Concurrent;
-using System.ComponentModel;
-using System.Text.Json;
-using Container = Microsoft.Azure.Cosmos.Container;
+//using System.ComponentModel;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Threading;
 
 namespace IoTServices
 {
@@ -11,7 +12,7 @@ namespace IoTServices
     {
         Task InsertDeviceData(MessageIoT deviceData);
         Task<List<object>> GetData();
-
+        Task GetAndUpdateESPData();
     }
 
     public class DatabaseService : IDatabaseService
@@ -22,7 +23,8 @@ namespace IoTServices
 
         public DatabaseService(string endpoint, string key, string databaseName, string containerName)
         {
-            client = new CosmosClient(endpoint, key);
+            client = new CosmosClient(endpoint, key, new CosmosClientOptions() { AllowBulkExecution = true });
+            
             Database _database = client.GetDatabase(databaseName);
             _devicesDBContainer = _database.GetContainer(containerName);
             //_inventory = _database.GetContainer("");
@@ -47,7 +49,7 @@ namespace IoTServices
 
                 var rslt = new List<object>();
 
-            String queryString = @"SELECT c.id,c.DeviceId,c.MessageData,c.MessageDate FROM c WHERE c.DeviceId = 'TopeniObejvak'";
+            String queryString = @"SELECT TOP 1000 c.id,c.DeviceId,c.MessageData,c.MessageDate FROM c WHERE c.DeviceId IN( 'TopeniObejvak', 'esp32Temperature') AND (CONTAINS(c.MessageDate,'2023')) ORDER BY c._ts DESC";
 
                 var query = new QueryDefinition(queryString);
                 //    .WithParameter("@batchSize", this._config.BatchSizeNotUpdatedDetailedTeamsData)
@@ -64,7 +66,7 @@ namespace IoTServices
                         rslt.Add(rsp);
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
 
                     //throw;
@@ -72,6 +74,71 @@ namespace IoTServices
                 return rslt;
 
             
+        }
+
+        public async Task GetAndUpdateESPData()
+        {
+
+            var _itemsToUpdate = new List<MessageIoT>();
+
+            String queryString = @"SELECT TOP 1000 * FROM c WHERE c.DeviceId IN('esp32Temperature') AND (CONTAINS(c.MessageDate,'2023')) ORDER BY c._ts DESC";
+
+            var query = new QueryDefinition(queryString);
+
+            //using var iterator = _devicesDBContainer.GetItemQueryIterator<dynamic>(query);
+
+            // Query multiple items from container
+            using FeedIterator<MessageIoT> iterator = _devicesDBContainer.GetItemQueryIterator<MessageIoT>(
+                queryText: queryString
+            );
+
+            try
+            {
+
+                while (iterator.HasMoreResults)
+                {
+
+                    FeedResponse<MessageIoT> response = await iterator.ReadNextAsync();
+                    foreach (MessageIoT item in response)
+                    {
+
+                        _itemsToUpdate.Add(item);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                //throw;
+            }
+
+
+            foreach (var item in _itemsToUpdate)
+            {
+                if (item.DeviceData.DataSet.Any(x=>x.Name=="voltage"))
+                {
+                    var itemToUpdateVoltage = item.DeviceData.DataSet.Where(x => x.Name == "voltage").FirstOrDefault();
+                    itemToUpdateVoltage.Value = "2000";
+                }
+            }
+
+            //Update dat:
+            List<Task> tasks = new List<Task>();
+
+            try
+            {
+                foreach (var item in _itemsToUpdate)
+                {
+                    tasks.Add(_devicesDBContainer.UpsertItemAsync(item));
+                    //var res = await _devicesDBContainer.UpsertItemAsync(item);
+                }
+                await Task.Run(() => Task.WaitAll(tasks.ToArray()), CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+
+               
+            }
         }
 
     }

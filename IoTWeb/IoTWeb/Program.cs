@@ -15,12 +15,6 @@ builder.Services.AddCors(opt =>
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
-    //opt.AddPolicy(name: MyAllowSpecificOrigins,
-    //                  policy =>
-    //                  {
-    //                      policy.WithOrigins("https://getiotdatavik.azurewebsites.net",
-    //                                          "http://www.contoso.com");
-    //                  });
 });
 
 var app = builder.Build();

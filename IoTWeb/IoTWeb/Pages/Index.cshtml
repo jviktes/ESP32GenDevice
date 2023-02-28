@@ -51,30 +51,35 @@
 
         function drawChartIoTData() {
 
-            var dataForGoogle = [];
-            dataForGoogle.push(['Year', 'Sales', 'Expenses']);
+            var dataForGoogleTopeni = [];
+            dataForGoogleTopeni.push(['Year', 'Sales', 'Expenses']);
 
-            dataForGoogle.push(['2004', 1000, 400]);
-            dataForGoogle.push(['2005', 1170, 460]);
-            dataForGoogle.push(['2006', 660, 1120]);
-            dataForGoogle.push(['2007', 1030, 540]);
+        dataForGoogleTopeni.push(['2004', null, 400]);
+        dataForGoogleTopeni.push(['2005', 890, null]);
+        dataForGoogleTopeni.push(['2006', null, 1120]);
+        dataForGoogleTopeni.push(['2007', 1170, null]);
+        dataForGoogleTopeni.push(['2004', null, 540]);
+        dataForGoogleTopeni.push(['2005', 1170, null]);
+        dataForGoogleTopeni.push(['2006', null, 5620]);
+        dataForGoogleTopeni.push(['2007', 1030, null]);
+
             var options = {
             title: 'Company Performance',
             curveType: 'function',
             legend: { position: 'bottom' }
             };
 
-            var data = google.visualization.arrayToDataTable(dataForGoogle);
+            var data = google.visualization.arrayToDataTable(dataForGoogleTopeni);
 
-            var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
 
             chart.draw(data, options)
     }
 
 
     function getJsonDataIoT() {
-        var url="http://localhost:7116/api/GetIoTData?devidId=pokus";
-        //var url = "https://getiotdatavik.azurewebsites.net/api/GetIoTData?code=Cyq5XKSIRkOkt-Ih6ZABBPHMvGq26Qg9DNe7ZcD8MAQTAzFuUF3uXQ==";
+        //var url="http://localhost:7116/api/GetIoTData?devidId=pokus";
+        var url = "https://getiotdatavik.azurewebsites.net/api/GetIoTData?code=Cyq5XKSIRkOkt-Ih6ZABBPHMvGq26Qg9DNe7ZcD8MAQTAzFuUF3uXQ==";
         $.ajax({
             dataType: "json",
             url: url,
@@ -84,16 +89,19 @@
             console.log(data);
             //prepare data:
             var dataForGoogle = [];
-            dataForGoogle.push(['MessageDate', 'Temperature']);
+            dataForGoogle.push(['MessageDate', 'TopeniObejvak', 'esp32Temperature']);
+
+            //var dataForGoogleESP= [];
+            //dataForGoogleESP.push(['MessageDate', 'Temperature']);
 
 
             //Example data:
             //{
             //    "id": "76f63324-3efa-497f-928e-369a0a08b0ca",
-            //        "DeviceId": "TopeniObejvak",
-            //            "MessageData": {
-            //            "IdMessage": "76f63324-3efa-497f-928e-369a0a08b0ca",
-            //            "DataSet": [
+            //     "DeviceId": "TopeniObejvak",
+            //     "MessageData": {
+            //     "IdMessage": "76f63324-3efa-497f-928e-369a0a08b0ca",
+            //     "DataSet": [
             //                {
             //                    "Name": "temperature",
             //                    "Value": "224"
@@ -104,25 +112,58 @@
             //}
 
 
-            var objectWithGroupByName = {};
-            for (var key in data[0]) 
-            {
-                var name = data[0][key].DeviceId;
-                if (!objectWithGroupByName[name]) {
-                    objectWithGroupByName[name] = [];
-                }
-                objectWithGroupByName[name].push(data[0][key]);
-            }
+            //var objectWithGroupByName = {};
+            //for (var key in data[0]) 
+            //{
+            //    var name = data[0][key].DeviceId;
+            //    if (!objectWithGroupByName[name]) {
+            //        objectWithGroupByName[name] = [];
+            //    }
+            //    objectWithGroupByName[name].push(data[0][key]);
+            //}
 
+            //'TopeniObejvak', 'esp32Temperature'
             Object.entries(data[0]).forEach(entry => {
-                var _obj = entry[1]["MessageData"]["DataSet"][0];
-                var _temperature= _obj["Name"];
-                var _value = parseInt(_obj["Value"]);
-                var _dateMessage = new Date(entry[1]["MessageDate"]);
-                dataForGoogle.push([_dateMessage, _value]);
-            });
+                //if (entry[1]["DeviceId"] == 'TopeniObejvak') {
+                //    var _obj = entry[1]["MessageData"]["DataSet"][0];
+                //    var _temperature = _obj["Name"];
+                //    var _value = parseInt(_obj["Value"]);
+                //    var _dateMessage = new Date(entry[1]["MessageDate"]);
+                //    //var _deviceId = entry[1]["DeviceId"]
+                //    dataForGoogle.push([_dateMessage, _value, null]);
+                //}
+                if (entry[1]["DeviceId"] == 'TopeniObejvak') {
+                    var _obj = entry[1]["MessageData"]["DataSet"];
 
-            var dataFormated = google.visualization.arrayToDataTable(dataForGoogle);
+                    Object.entries(_obj).forEach(entryDetailed => {
+                        if (entryDetailed[1]["Name"] == "temperature") {
+                            var _temperature = entryDetailed[1]["Name"];
+                            var _value = parseInt(entryDetailed[1]["Value"]);
+                            var _dateMessage = new Date(entry[1]["MessageDate"]);
+                            //var _deviceId = entry[1]["DeviceId"]
+                            if (_value != null) {
+                                dataForGoogle.push([_dateMessage,_value, null ]);
+                            }
+                        }
+                    })
+                }
+                if (entry[1]["DeviceId"] == 'esp32Temperature') {
+                    var _obj = entry[1]["MessageData"]["DataSet"];
+
+                    Object.entries(_obj).forEach(entryDetailed => {
+                        if (entryDetailed[1]["Name"] == "temperature") {
+                            var _temperature = entryDetailed[1]["Name"];
+                            var _value = parseInt(entryDetailed[1]["Value"]);
+                            var _dateMessage = new Date(entry[1]["MessageDate"]);
+                            //var _deviceId = entry[1]["DeviceId"]
+                            if (_value!=null) {
+                                dataForGoogle.push([_dateMessage, null, _value]);
+                            } 
+                            
+                        }
+                    })
+                }
+            });
 
             var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
 
@@ -132,7 +173,11 @@
                 legend: { position: 'bottom' }
             };
 
-            chart.draw(dataFormated, options)
+            var dataFormated = google.visualization.arrayToDataTable(dataForGoogle);
+            chart.draw(dataFormated, options);
+
+
+            //chart.draw(dataFormatedESP, options);
 
         });;
     }
