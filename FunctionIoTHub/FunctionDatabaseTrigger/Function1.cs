@@ -28,6 +28,11 @@ namespace FunctionDatabaseTrigger
                 _logger.LogInformation("Documents modified: " + input.Count);
                 _logger.LogInformation("First document Id: " + input[0].Id);
             }
+
+            //tady projit obsah zpravy--> pro deviceId najit vsechny action_DB
+            //ActionDB - co d?lat se zprávou:
+            //rozparsovat obsah: pokud nap?. SendEmail --> zavolaní, TriggerEvent, poslat Message
+
         }
     }
 
