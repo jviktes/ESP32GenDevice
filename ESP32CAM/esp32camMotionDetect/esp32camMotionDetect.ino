@@ -8,6 +8,7 @@
 #include "EloquentSurveillance.h"
 
 #include "SD_MMC.h"            // SD Card ESP32
+#include "time.h"
 
 /**
  * Instantiate motion detector
@@ -15,12 +16,35 @@
 EloquentSurveillance::Motion motion;
 
 #define FLASH_GPIO_NUM 4
-/**
- *
- */
+
+// Please input the SSID and password of WiFi
+const char* ssid = "dlink";
+const char* password = ".MoNitor2?";
+
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = 0;
+const int   daylightOffset_sec = 3600;
+
+char tempMessagePayload[22];
+
 void setup() {
     Serial.begin(115200);
     delay(3000);
+
+    WiFi.mode(WIFI_AP);
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+    }
+  
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  //init time:
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  
     debug("INFO", "Init");
 
     /**
@@ -95,8 +119,10 @@ void loop() {
     if (motion.detect()) {
 
       Serial.printf("Motion detected!");
-                
-                String filename = motion.getNextFilename("/pictures/capture_");
+      char * messageDate = getLocalTime();
+      debug("INFO",messageDate);
+
+                String filename = "/pictures/"+String(messageDate) +".jpg";//motion.getNextFilename("/pictures/capture_");
 
                 // Path where new picture will be saved in SD Card
                 String path = filename;
@@ -116,4 +142,17 @@ void loop() {
                     
                 //delay(500);
      }
+}
+
+char *getLocalTime() {
+  struct tm timeinfo;
+  const char *dateData = "%s-%s-%s_%s_%s_%s";
+
+  if (!getLocalTime(&timeinfo)) {
+    Serial.println("Failed to obtain time");
+    return tempMessagePayload;
+  }
+
+  snprintf(tempMessagePayload, 22, dateData, String(timeinfo.tm_year + 1900), String(timeinfo.tm_mon+1), String(timeinfo.tm_mday),String(timeinfo.tm_hour),String(timeinfo.tm_min),String(timeinfo.tm_sec));
+  return tempMessagePayload;
 }
