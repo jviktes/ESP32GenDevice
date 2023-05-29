@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <History>True|2023-05-22T19:32:58.5304127Z;True|2023-05-21T20:52:27.8931068+02:00;True|2023-05-21T20:31:03.1718128+02:00;True|2023-05-21T20:06:58.9710629+02:00;True|2023-05-21T19:44:04.8402476+02:00;True|2023-05-21T19:36:55.4801104+02:00;True|2023-05-20T19:32:11.5384460+02:00;True|2023-05-20T19:00:52.6249314+02:00;True|2023-05-20T18:53:56.9441869+02:00;True|2023-05-20T13:30:04.6716765+02:00;True|2023-05-19T20:32:47.4970365+02:00;True|2023-05-19T19:12:25.0919930+02:00;True|2023-05-19T19:12:03.1132510+02:00;False|2023-05-19T19:11:55.7330705+02:00;</History>
+    <LastFailureDetails />
+    <_PublishTargetUrl>E:\Dropbox\_work_in_progress\AzureIOT\RaspberryPiServer\Danfoss\FunctionDanfoss\DanfosWebApp\bin\Release\net7.0\publish\</_PublishTargetUrl>
+  </PropertyGroup>
+</Project>
