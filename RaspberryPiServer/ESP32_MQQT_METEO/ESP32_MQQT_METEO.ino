@@ -23,6 +23,15 @@
 
 Adafruit_BMP280 bmp; 
 
+//DHT SENSOR:
+#include "DHT.h"
+#define pinDHT 13
+#define typDHT11 DHT11
+DHT temperatureSensor(pinDHT, typDHT11);
+
+//LIGHT SENSOR:
+const int pResistor = 34;
+
 // Replace the next variables with your SSID/Password combination
 const char* ssid = "dlink";
 const char* password = ".MoNitor2?";
@@ -40,6 +49,7 @@ int value = 0;
 float temperature = 0;
 float humidity = 0;
 float pressure = 0;
+float temperatureDHT = 0;
 // LED Pin
 const int ledPin = 4;
 
@@ -48,6 +58,7 @@ void setup() {
   Serial.println(F("BMP280 Forced Mode Test."));
 
 
+  temperatureSensor.begin(); // initialize the DHT sensor
 
   //if (!bmp.begin(BMP280_ADDRESS_ALT, BMP280_CHIPID)) {
   if (!bmp.begin(0x76)) {
@@ -61,7 +72,7 @@ void setup() {
                   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
                   Adafruit_BMP280::FILTER_X16,      /* Filtering. */
                   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
-                  
+
   pinMode(ledPin, OUTPUT);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
@@ -187,37 +198,58 @@ void loop() {
     else {
       Serial.println("problem");
     }
-    //humidity = bmp.readHumidity();
+    humidity = getHuminidy();
     
-    // Convert the value to a char array
-    // char humString[8];
-    // dtostrf(humidity, 1, 2, humString);
-    // Serial.print("Humidity: ");
-    // Serial.println(humString);
-    // client.publish("esp32/humidity", humString);
+    //Convert the value to a char array
+    char humString[8];
+    dtostrf(humidity, 1, 2, humString);
+    Serial.print("Humidity: ");
+    Serial.println(humString);
+    client.publish("esp32/humidity", humString);
+
+    temperatureDHT= getTemperatureDHT();
+    char temperatureDHTString[8];
+    dtostrf(temperatureDHT, 1, 2, temperatureDHTString);
+    Serial.print("TemperatureDHT: ");
+    Serial.println(temperatureDHTString);
+    client.publish("esp32/temperatureDHT", temperatureDHTString);
+
   }
 
-  // // must call this to wake sensor up and get new measurement data
-  // // it blocks until measurement is complete
-  // if (bmp.takeForcedMeasurement()) {
-  //   // can now print out the new measurements
-  //   Serial.print(F("Temperature = "));
-  //   Serial.print(bmp.readTemperature());
-  //   Serial.println(" *C");
+}
 
-  //   Serial.print(F("Pressure = "));
-  //   Serial.print(bmp.readPressure());
-  //   Serial.println(" Pa");
+float getHuminidy() {
+  float _vlhkost = 0;
+  _vlhkost = temperatureSensor.readHumidity();
+  if (isnan(_vlhkost)) {
 
-  //   Serial.print(F("Approx altitude = "));
-  //   Serial.print(bmp.readAltitude(1013.25)); /* Adjusted to local forecast! */
-  //   Serial.println(" m");
+    Serial.println("Chyba pri cteni vlhkosti z DHT senzoru!");
+  }
+  else {
+    Serial.println("Vlhkost: " + String(_vlhkost) + " %");
+  }
+  return _vlhkost;
+}
 
-  //   Serial.println();
-  //   delay(2000);
-  // } else {
-  //   Serial.println("Forced measurement failed!");
-  // }
+float getTemperatureDHT() {
+  //Serial.println("DHT readTemperature");
+  float _vnitrniTeplota = 0;
+  _vnitrniTeplota = temperatureSensor.readTemperature();
 
+  if (isnan(_vnitrniTeplota)) {
 
+    Serial.println("Chyba pri cteni teploty z DHT senzoru!");
+  }
+  else {
+    Serial.println("DHT teplota:  " + String(_vnitrniTeplota) + ".");
+  }
+
+  return _vnitrniTeplota;
+}
+
+int getLightIntensity() {
+
+  int lightInt = analogRead(pResistor);
+  Serial.println("LightIntensity:" + String(lightInt));
+  return lightInt;
 }
