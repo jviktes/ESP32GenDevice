@@ -42,8 +42,8 @@ void setup() {
 
   //String responseBasic = "Hi! I am ESP32 on "+String(WiFi.localIP());
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
-      Serial.print("Hi! I am ESP32 ");
-      AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html; charset=utf-8", "Hi! I am ESP32");
+      Serial.print("Hi! I am ESP32-PIR1 ");
+      AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html; charset=utf-8", "Hi! I am ESP32-PIR1");
       request->send(response);
   });
 
