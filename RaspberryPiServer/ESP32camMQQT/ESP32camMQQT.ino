@@ -8,6 +8,7 @@
 
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <ESPAsyncWebServer.h>
 
 // Add your MQTT Broker IP address, example:
 const char* mqtt_server = "192.168.0.136";
@@ -19,6 +20,7 @@ const char* password = ".MoNitor2?";
 String serverName = "192.168.0.136";   // REPLACE WITH YOUR Raspberry Pi IP ADDRESS
 WiFiClient wifiClient;
 PubSubClient pubClient(wifiClient);
+AsyncWebServer server(80);
 
 void setup() {
     Serial.begin(115200);
@@ -39,6 +41,20 @@ void setup() {
 
   pubClient.setServer(mqtt_server, 1883);
   pubClient.setCallback(callback);
+
+     //String responseBasic = "Hi! I am ESP32 on "+String(WiFi.localIP());
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
+      Serial.print("Hi! I am ESP32-CAM ");
+      AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html; charset=utf-8", "Hi! I am ESP32-CAM-v1");
+      request->send(response);
+  });
+  server.on("/take", HTTP_GET, [](AsyncWebServerRequest* request) {
+      Serial.print("Hi! I am ESP32-CAM take");
+      AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html; charset=utf-8", "Hi! I am ESP32-CAM-take picture");
+      request->send(response);
+  });
+  
+  server.begin();
 
 }
 
