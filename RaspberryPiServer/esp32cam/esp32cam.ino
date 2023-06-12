@@ -143,6 +143,9 @@ void setup() {
   pubClient.setServer(mqtt_server, 1883);
   pubClient.setCallback(callback);
 
+  
+
+
 }
 
 /**
@@ -187,6 +190,7 @@ void reconnect() {
     // Attempt to connect
     if (pubClient.connect("ESP32CAMClient")) {
       Serial.println("connected");
+      pubClient.publish("esp32cam/photo","esp32cam start!");
       // Subscribe
       pubClient.subscribe("esp32cam/photo");
     } else {
