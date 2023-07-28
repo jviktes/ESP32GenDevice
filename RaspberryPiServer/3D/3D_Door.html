@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Interactive 3D Door</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <a-assets>
+        <a-asset-item id="door-model" src="door.gltf"></a-asset-item>
+      </a-assets>
+
+      <a-entity id="door" gltf-model="#door-model" position="0 0 -3" rotation="0 0 0"></a-entity>
+
+      <a-camera position="0 1.6 0"></a-camera>
+
+      <a-sky color="#ECECEC"></a-sky>
+    </a-scene>
+
+    <button onclick="openDoor()">Open Door</button>
+
+    <script>
+      function openDoor() {
+        var door = document.querySelector('#door');
+        door.setAttribute('animation', 'property: rotation; to: 0 -90 0; dur: 1000');
+      }
+      
+      var doorData={
+  "asset": {
+    "version": "2.0",
+    "generator": "OpenAI"
+  },
+  "scenes": [
+    {
+      "nodes": [0]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "Door",
+      "mesh": 0
+    }
+  ],
+  "meshes": [
+    {
+      "name": "DoorMesh",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "NORMAL": 2,
+            "TEXCOORD_0": 3
+          },
+          "mode": 4,
+          "indices": 0,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "byteOffset": 0,
+      "componentType": 5123,
+      "count": 36,
+      "type": "SCALAR",
+      "max": [35],
+      "min": [0]
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 0,
+      "componentType": 5126,
+      "count": 8,
+      "type": "VEC3",
+      "max": [1, 1, 1],
+      "min": [-1, -1, -1]
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 0,
+      "componentType": 5126,
+      "count": 8,
+      "type": "VEC3",
+      "max": [0, 1, 0],
+      "min": [0, 1, 0]
+    },
+    {
+      "bufferView": 3,
+      "byteOffset": 0,
+      "componentType": 5126,
+      "count": 8,
+      "type": "VEC2",
+      "max": [1, 1],
+      "min": [0, 0]
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 72,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 72,
+      "byteLength": 96,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 168,
+      "byteLength": 96,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 264,
+      "byteLength": 64,
+      "target": 34962
+    }
+  ],
+  "materials": [
+    {
+      "name": "DoorMaterial",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "roughnessFactor": 1.0
+      }
+    }
+  ],
+  "textures": [
+    {
+      "source": 0
+    }
+  ],
+  "images": [
+    {
+      "uri": "path/to/door_texture.jpg"
+    }
+  ],
+  "buffer": "data:application/octet-stream;base64,//8AAAB..."
+}
+    </script>
+  </body>
+</html>
+

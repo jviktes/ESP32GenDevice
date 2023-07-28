@@ -1,0 +1,282 @@
+#VRML V2.0 utf8
+
+
+Transform {	translation  1000 0 -700 children [
+
+DEF Skrin Transform{
+translation 0 50 0
+rotation -1 0 0 -1.571
+children[
+Shape{
+appearance Appearance{
+material Material{
+diffuseColor .525 .431 .0314
+}
+}
+geometry DEF Skrin-FACES IndexedFaceSet{
+ccw TRUE
+solid TRUE
+coord DEF Skrin-COORD Coordinate{point[
+100 0 50,100 0 -50,-100 0 -50,-100 0 50,90 0 -40,
+90 0 40,-90 0 40,-90 0 -40,100 50 50,100 50 -50,
+-100 50 -50,-100 50 50,90 50 -40,90 50 40,-90 50 40,
+-90 50 -40]
+}
+coordIndex[
+15,9,10,-1,14,15,10,-1,14,10,11,-1,13,14,11,-1,
+13,11,8,-1,12,13,8,-1,12,8,9,-1,12,9,15,-1,
+0,1,9,-1,9,8,0,-1,1,2,10,-1,10,9,1,-1,
+2,3,11,-1,11,10,2,-1,3,0,8,-1,8,11,3,-1,
+4,5,13,-1,13,12,4,-1,5,6,14,-1,14,13,5,-1,
+6,7,15,-1,15,14,6,-1,7,4,12,-1,12,15,7,-1,
+3,2,1,-1,1,0,3,-1,7,6,5,-1,5,4,7,-1]
+}
+}
+]
+}
+
+DEF BOX_ODKAZ1 Transform{
+translation 0 71.5 35
+
+children[
+
+
+Group{children[
+
+
+DEF Odkaz_plocha1 Transform{
+translation 0 16 -5
+scale 0.7925 1 0.7925
+children[
+Transform{
+translation 0 -1 0
+children[
+Shape{
+appearance Appearance{
+material Material{
+diffuseColor 0.6 0.8941 0.6
+}
+}
+geometry Box{size 180 3 40}
+}
+]}
+]
+}
+
+
+]}
+
+DEF vysun1 PositionInterpolator{
+key[0,1]
+keyValue[0 71.5 35,0 71.5 70]},
+
+DEF zasun1 PositionInterpolator{
+key[0,1]
+keyValue[0 71.5 70,0 71.5 35]},
+
+
+Group{children[
+DEF	touchVysun1 TouchSensor{}
+DEF TIMER1 TimeSensor{loop FALSE cycleInterval 1}
+
+DEF Vysun_box1 Transform{
+translation 80 16 20
+children[Anchor{description "gdgdg"}
+Transform{
+translation 0 -7.5 0
+children[
+Shape{
+appearance Appearance{
+material Material{
+diffuseColor .88 .15 .01
+specularColor .19 .03 .03
+ambientIntensity .0833
+shininess .08
+}
+}
+geometry Box{size 20 15 10}
+}
+]}
+]
+}
+]}
+
+Group{children[
+DEF	touchZasun1 TouchSensor{}
+DEF TIMER2 TimeSensor{loop FALSE cycleInterval 1},
+DEF Zasun_box1 Transform{
+translation 80 -4 20
+children[
+Transform{
+translation 0 -7.5 0
+children[
+Shape{
+appearance Appearance{
+material Material{
+diffuseColor .102 .694 .102
+}
+}
+geometry Box{size 20 15 10}
+}
+]}
+]
+}
+]}
+
+
+
+DEF Odkaz1_BOX Transform{
+
+translation 0 -1.5 -25
+rotation -1 0 0 -1.571
+children[
+Transform{
+translation 0 20 0
+children[
+Shape{
+appearance Appearance{
+material Material{
+diffuseColor .525 .431 .0314
+}
+}
+geometry Box{size 180 40 35}
+}
+]}
+]
+}
+]}
+
+
+
+
+
+
+
+DEF BOX_ODKAZ2 Transform{
+translation 0 31.5 35
+children[
+
+DEF vysun2 PositionInterpolator{
+key[0,1]
+keyValue[0 31.5 35
+0 31.5 70,]}
+DEF zasun2 PositionInterpolator{
+key[0 1]
+keyValue[0 31.5 70,0 31.5 35]}
+
+Anchor{url "piston.wrl" children
+
+DEF Odkaz_plocha01 Transform{
+translation 0 16 -5
+scale 0.7925 1 0.7925
+children[
+Transform{
+translation 0 1.5 0
+children[
+Shape{
+appearance Appearance{
+material Material{
+diffuseColor .18 .3 .25
+specularColor .49 .49 .49
+emissiveColor .18 .3 .25
+ambientIntensity 0
+shininess .1
+}
+}
+geometry Box{size 180 3 40}
+}
+]}
+]
+}
+}
+
+Group{children[
+DEF	touchVysun2 TouchSensor{}
+DEF TIMER3 TimeSensor{loop FALSE cycleInterval 1},
+DEF Vysun_box1_0 Transform{
+translation 80 16 20
+children[
+Transform{
+translation 0 -7.5 0
+children[
+Shape{
+appearance Appearance{
+material Material{
+diffuseColor 1 0 0
+emissiveColor .2 0 0
+ambientIntensity 0
+shininess 0
+}
+}
+geometry Box{size 20 15 10}
+}
+]}
+]
+},
+]}
+
+Group{children[
+DEF TIMER4 TimeSensor{loop FALSE cycleInterval 1},
+DEF	touchzasun2 TouchSensor{}
+DEF Zasun_box2_0 Transform{
+translation 80 -4 20
+children[
+Transform{
+translation 0 -7.5 0
+children[
+Shape{
+appearance Appearance{
+material Material{
+diffuseColor .03 1 .54
+emissiveColor 0 .1 .05
+ambientIntensity 0
+shininess 0
+}
+}
+geometry Box{size 20 15 10}
+}
+]}
+]
+}
+
+]}
+DEF Odkaz2_BOX Transform{
+translation 0 -1.5 -25
+rotation -1 0 0 -1.571
+children[
+Transform{
+translation 0 20 0
+children[
+Shape{
+appearance Appearance{
+material Material{
+diffuseColor .525 .431 .0314
+}
+}
+geometry Box{size 180 40 35}
+}
+]}
+]
+}
+]
+
+}
+]}
+
+
+ROUTE touchVysun1.touchTime	TO TIMER1.startTime
+ROUTE TIMER1.fraction_changed	TO vysun1.set_fraction
+ROUTE vysun1.value_changed TO BOX_ODKAZ1.translation
+
+ROUTE touchZasun1.touchTime	TO TIMER2.startTime
+ROUTE TIMER2.fraction_changed	TO zasun1.set_fraction
+ROUTE zasun1.value_changed TO BOX_ODKAZ1.translation
+
+
+ROUTE touchVysun2.touchTime	TO TIMER3.startTime
+ROUTE TIMER3.fraction_changed	TO vysun2.set_fraction
+ROUTE vysun2.value_changed TO BOX_ODKAZ2.translation
+
+ROUTE touchzasun2.touchTime	TO TIMER4.startTime
+ROUTE TIMER4.fraction_changed	TO zasun2.set_fraction
+ROUTE zasun2.value_changed TO BOX_ODKAZ2.translation

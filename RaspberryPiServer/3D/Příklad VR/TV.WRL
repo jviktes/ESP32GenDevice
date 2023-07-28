@@ -1,0 +1,89 @@
+#VRML V2.0 utf8
+
+#PROTO TV []{
+
+DEF Televize Transform {
+translation 240.1 125 -11.17
+rotation 0 -1 0 -3.142
+children [
+
+DEF Obrazovka Transform {
+translation -1.72e-005 -68.4 1.669
+scale 0.95 0.95 0.95
+children [
+Transform {
+translation 0 72 0
+children [
+	Shape {	appearance Appearance {texture MovieTexture	
+		{url "video/film2.mpeg" startTime 1 speed 1  loop TRUE }
+		material Material {diffuseColor 0.61 0.61 0.61 ambientIntensity .25 
+		specularColor .39 .39 .39 shininess 0.11}}
+		geometry Box {size 256 144 20}
+	}
+]
+}
+]
+}
+
+
+
+
+DEF TV Transform {
+translation -1.677e-005 -72 -1.169
+children [
+Transform {
+translation 0 72 0
+children [
+Shape {
+appearance Appearance {
+material Material {
+diffuseColor .38 .38 .42
+specularColor .53 .53 .53
+ambientIntensity .0933
+shininess .93
+}
+}
+geometry Box { size 256 144 20 }
+}
+] }
+]
+}
+]
+}
+
+
+DEF StopTV Transform {
+translation 85.31 43.94 -2.475
+children [
+Transform {
+translation 0 10 0
+children [
+Shape {
+appearance Appearance {
+material Material {
+diffuseColor 0.8784 0.3373 0.3373
+}
+}
+geometry Box { size 40 20 5 }
+}
+] }
+]
+}
+
+DEF StartTV Transform {
+translation 85.31 70 -2.475
+children [
+Transform {
+translation 0 10 0
+children [
+Shape {
+appearance Appearance {
+material Material {
+diffuseColor 0.102 0.6941 0.102
+}
+}
+geometry Box { size 40 20 5 }
+}
+] }
+]
+}

@@ -2,11 +2,16 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Security.Principal;
 using System.Text;
 using System.Text.Json.Serialization;
+
+using System.Collections.Generic;
+using System.Text.Json;
 
 namespace DanfosWebApp.Controllers
 {
@@ -28,7 +33,35 @@ namespace DanfosWebApp.Controllers
         {
             string responseString = await ProcessGetRequestToDanfassAPI();
             DanfossData.Root objectData = PrepeareTelemetryData(responseString);
+
+            //
+            //objectData.Result.Status
+
+            Dictionary<string, string> datav2 = new Dictionary<string, string>();
+            
+
+
+            // Add key-value pairs to the list
+            //datav2.Add(new KeyValuePair<string, string>("Key1", "Value1"));
+
+            
+            foreach (var item in objectData.Result.Status)
+            {
+                datav2.Add(item.Code, item.Value.ToString());
+                //datav2.Add(new KeyValuePair<string, string>(item.Code, item.Value.ToString()));
+            }
+            
+            string json = System.Text.Json.JsonSerializer.Serialize(datav2);
+            objectData.Result.Datav2 = json;
+
             DanfossData.Result res = objectData.Result;
+            res.Status = null;
+
+            //var tt = res.Status.Where(x => x.Code == "lower_temp").FirstOrDefault();
+            //var trt = tt.Value;
+            //zde proberu, co budu chtit:
+
+
             return res;
         }
 
@@ -68,6 +101,7 @@ namespace DanfosWebApp.Controllers
         {
             DanfossData.Root json  = JsonConvert.DeserializeObject<DanfossData.Root>(responseString); //JObject.Parse(responseString);
             return json;
+
             //var temm = json["result"]["status"];
 
             //JArray a = (JArray)temm;

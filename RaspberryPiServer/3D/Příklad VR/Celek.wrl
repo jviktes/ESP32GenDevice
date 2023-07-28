@@ -1,0 +1,133 @@
+#VRML V2.0 utf8
+NavigationInfo {speed 10 avatarSize [10 150 50] type ["walk"] headlight TRUE }
+
+DEF Camera01 Viewpoint {
+position 938.5 140 200
+#orientation 0.9667 0.2149 -0.1389 -0.7951
+orientation 1 0 0 0
+fieldOfView 0.9014
+description "Camera01"
+}
+DEF Camera02 Viewpoint {
+position 893.6 200 -365.3
+orientation 0 -1 0 -1.762
+fieldOfView 0.6024
+description "Camera02"
+}
+
+
+
+Inline {url "okno.wrl"}
+Inline {url "steny.wrl"}
+Inline {url "futraA.wrl"}
+Inline {url "tv.wrl"}
+Inline {url "skrin.wrl"}
+
+
+#----------------DVERE A------------------
+DEF	dvereA Transform { center 1009.375 103.3 35 children  [  
+	Inline {url "dvere.wrl" }				  
+
+	DEF	klika Transform {children [Group 
+
+		{children [
+		DEF klikaA1 Inline {url "klikaA1.wrl" }
+	    DEF	touch1 TouchSensor {}
+	             ]
+	    }
+		DEF	klikaA2	Inline	{url  "klikaA2.wrl"}
+        DEF	touch2 TouchSensor {}
+				            ]	}
+					
+					]}
+
+DEF	TIME1 TimeSensor {cycleInterval 4}
+DEF	TIME2 TimeSensor {cycleInterval 4}
+DEF	otevreniA OrientationInterpolator {key [0,1] keyValue [0 1 0 0, 0 1 0 1.57 ]}
+DEF	zavreniA OrientationInterpolator {key [0,1] keyValue [0 1 0 1.57, 0 1 0 0]}
+
+ROUTE touch1.touchTime TO	TIME1.startTime
+ROUTE TIME1.fraction_changed TO	otevreniA.set_fraction
+ROUTE otevreniA.value_changed TO dvereA.rotation
+
+ROUTE touch2.touchTime TO	TIME2.startTime
+ROUTE TIME2.fraction_changed TO	zavreniA.set_fraction
+ROUTE zavreniA.value_changed TO	dvereA.rotation
+
+#----------------DVERE A------------------
+
+#----------------Kytka--------------------
+LOD	{range [500] center 1316 115.5 -161.7
+	level [	DEF	Kytka1 Inline {url "kytka1.wrl"}
+		    DEF	Kytka2 Inline {url "kytka2.wrl"	}
+	]
+	}
+
+#----------------Kytka--------------------
+#----------------DvereB-------------------
+
+EXTERNPROTO	DvereB1[] "dvereB_statika.wrl#DvereB1"
+EXTERNPROTO	DvereB2[] "dvereB_statika.wrl#DvereB2"		  
+EXTERNPROTO	futra[] "dvereB_statika.wrl#FutraB"
+	
+DEF	futra futra	{}
+DEF	DvereB1  Transform {translation 0 0 0 children DvereB1 {}}
+DEF	DvereB2	Transform {translation 0 0  0 children DvereB2 {}}
+
+#---otevreni DvereB1------
+
+DEF Time_B1_open TimeSensor { loop FALSE cycleInterval 1 },
+DEF Position_B1_open PositionInterpolator {
+key [0,1 ]
+keyValue [0 0 0,0 0 87.5] }
+
+#---otevreni DvereB2------
+DEF Time_B2_open TimeSensor { loop FALSE cycleInterval 1 },
+DEF Position_B2_open PositionInterpolator {
+key [0,1 ]
+keyValue [0 0 0,0 0 -87.5, ] }
+
+#---zavreni DvereB1------
+DEF Time_B1_close TimeSensor { loop FALSE cycleInterval 1 },
+DEF Position_B1_close PositionInterpolator {
+key [0,1 ]
+keyValue [0 0 87.5,0 0 0, ] }
+
+#---zavreni DvereB2------
+DEF Time_B2_close TimeSensor { loop FALSE cycleInterval 1 },
+DEF Position_B2_close PositionInterpolator {
+key [0,1 ]
+keyValue [0 0 -87.5,0 0 0, ] }
+
+ #---Proxi------
+DEF ProxSensor01 Transform {
+translation 497.6 0.005 -350
+children [
+DEF ProxSensor ProximitySensor {
+enabled TRUE
+center 0 100 0
+size 249.5 200 210.4
+}
+]
+}
+
+#----------------DvereB-------------------
+
+ROUTE ProxSensor.enterTime TO Time_B1_open.startTime
+ROUTE Time_B1_open.fraction_changed	TO Position_B1_open.set_fraction
+ROUTE Position_B1_open.value_changed TO	DvereB1.translation
+
+ROUTE ProxSensor.exitTime TO Time_B1_close.startTime
+ROUTE Time_B1_close.fraction_changed TO	Position_B1_close.set_fraction
+ROUTE Position_B1_close.value_changed TO DvereB1.translation
+
+ROUTE ProxSensor.enterTime TO Time_B2_open.startTime
+ROUTE Time_B2_open.fraction_changed	TO Position_B2_open.set_fraction
+ROUTE Position_B2_open.value_changed TO	DvereB2.translation
+
+ROUTE ProxSensor.exitTime TO Time_B2_close.startTime
+ROUTE Time_B2_close.fraction_changed TO	Position_B2_close.set_fraction
+ROUTE Position_B2_close.value_changed TO DvereB2.translation
+
+#----------------DvereB-------------------
+

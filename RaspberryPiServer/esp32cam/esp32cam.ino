@@ -11,18 +11,10 @@
 #include "time.h"
 
 #include <WiFi.h>
-#include <PubSubClient.h>
+
 #include <Wire.h>
 #include <ESPAsyncWebServer.h>
-
-// Add your MQTT Broker IP address, example:
-const char* mqtt_server = "192.168.0.136";
-
 AsyncWebServer server(80);
-
-//OTA update:
-#include <AsyncTCP.h>
-#include <AsyncElegantOTA.h>
 
 /**
  * Instantiate motion detector
@@ -44,9 +36,6 @@ String serverPath = "/upload";     // The default serverPath should be upload.ph
 const int serverPort = 4000;
 
 WiFiClient client;
-PubSubClient pubClient(client);
-
-
 
 void setup() {
     Serial.begin(115200);
@@ -123,14 +112,35 @@ void setup() {
   });
   server.on("/take", HTTP_GET, [](AsyncWebServerRequest* request) {
       Serial.print("Hi! I am ESP32-CAM take");
-      takePicture();
-      AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html; charset=utf-8", "Hi! I am ESP32-CAM-take picture");
+      String pictureName = takePicture();
+      AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html; charset=utf-8",pictureName.c_str());
       request->send(response);
   });
-  
+    server.on("/get", HTTP_GET, [](AsyncWebServerRequest* request) {
+      Serial.print("Hi! I am ESP32-CAM get picture");
 
+          int paramsNr = request->params();
+          Serial.println(paramsNr);
+          String photoFile = "";
+          for(int i=0;i<paramsNr;i++){
+      
+              AsyncWebParameter* p = request->getParam(i);
+              Serial.print("Param name: ");
+              Serial.println(p->name());
+              Serial.print("Param value: ");
+              Serial.println(p->value());
+              Serial.println("------");
+              String parametrName = p->name();
+              String parametrValue = p->value();
+              if (parametrName=="file") {
+                photoFile = parametrValue; 
+              }
+          }
 
-  AsyncElegantOTA.begin(&server);    // Start ElegantOTA
+      uploadPhoto(photoFile);
+      AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html; charset=utf-8", "Hi! I am ESP32-CAM get picture");
+      request->send(response);
+  });
   server.begin();
 
   Serial.println("server.begin OK");
@@ -139,67 +149,13 @@ void setup() {
   Serial.println("messageDate:");
   Serial.println(messageDate);
 
-  pubClient.setServer(mqtt_server, 1883);
-  pubClient.setCallback(callback);
-
-  
-
-
 }
 
 /**
  *
  */
 void loop() {
-    if (!pubClient.connected()) {
-    reconnect();
-  }
-  pubClient.loop();
-}
 
-void callback(char* topic, byte* message, unsigned int length) {
-  Serial.print("Message arrived on topic: ");
-  Serial.print(topic);
-  Serial.print(". Message: ");
-  String messageTemp;
-  
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)message[i]);
-    messageTemp += (char)message[i];
-  }
-  Serial.println();
-
-  // Feel free to add more if statements to control more GPIOs with MQTT
-
-  // If a message is received on the topic esp32/output, you check if the message is either "on" or "off". 
-  // Changes the output state according to the message
-  if (String(topic) == "esp32cam/photo") {
-    Serial.print("Changing output to ");
-    if(messageTemp == "take"){
-      Serial.println("take");
-      takePicture();
-    }
-  }
-}
-
-void reconnect() {
-  // Loop until we're reconnected
-  while (!pubClient.connected()) {
-    Serial.print("Attempting MQTT connection...");
-    // Attempt to connect
-    if (pubClient.connect("ESP32CAMClient")) {
-      Serial.println("connected");
-      pubClient.publish("esp32cam/photo","esp32cam start!");
-      // Subscribe
-      pubClient.subscribe("esp32cam/photo");
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(pubClient.state());
-      Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
-    }
-  }
 }
 
 char *getLocalTime() {
@@ -214,12 +170,12 @@ char *getLocalTime() {
   return tempMessagePayload;
 }
 
-void takePicture() {
+String takePicture() {
       Serial.println("takePicture");
       
     if (!camera.capture()) {
         debug("ERROR", camera.getErrorMessage());
-        return;
+        return "Error";
     }
 
       char * messageDate = getLocalTime();
@@ -241,14 +197,17 @@ void takePicture() {
                     //delay(1000);
                   }
                 file.close();
-                uploadPhoto(path,messageDate);
-                delay(1000);
+                //uploadPhoto(path,messageDate);
+                //delay(1000);
+                return path.c_str();
 }
 
-String uploadPhoto(String filePath,String fileName) {
+String uploadPhoto(String fileName) {
 
   String getAll;
   String getBody;
+
+  String filePath = "/pictures/"+fileName;
 
   Serial.println("Connecting to server: " + serverName);
 

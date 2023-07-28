@@ -1,0 +1,16 @@
+#VRML V2.0 utf8
+
+DEF KlikaA2 Transform {
+translation 899 90 32.5
+children [
+Shape {
+appearance Appearance {
+material Material {
+diffuseColor 0.2235 0.03137 0.5333
+}
+}
+geometry Sphere { radius 6 }
+}
+]
+}
+

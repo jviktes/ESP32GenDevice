@@ -1,0 +1,106 @@
+#VRML V2.0 utf8
+
+# Produced by 3D Studio MAX VRML97 exporter, Version 6, Revision 0,56
+# MAX File: Stìny_s TV01.max, Date: Sun Feb 20 14:40:30 2005
+
+DEF Camera01 Viewpoint {
+position 960.8 112.9 201.9
+orientation 1 0 0 0
+fieldOfView 0.9014
+description "Camera01"
+}
+DEF Camera02 Viewpoint {
+position 911.9 211.4 -326
+orientation 0 -1 0 -1.571
+fieldOfView 0.6024
+description "Camera02"
+}
+DEF Layout Transform {
+translation 750 0 -200
+children [
+]
+}
+DEF Strop Transform {
+translation 850 250 -85
+children [
+Shape {
+appearance Appearance {
+material Material {
+diffuseColor 0.8078 0.8078 0.8078
+ambientIntensity 1.0
+specularColor 0 0 0
+shininess 0.145
+transparency 0
+}
+}
+geometry DEF Strop-FACES IndexedFaceSet {
+ccw TRUE
+solid TRUE
+coord DEF Strop-COORD Coordinate { point [
+-100 0 -645, -880 0 -645, -880 0 -122.5, -880 0 115, -630 0 115, 
+-80 0 115, -80 0 321.3, -80 0 415, 32.5 0 415, 280 0 415, 280 0 265, 
+280 0 115, 480 0 115, 680 0 115, 680 0 -265, 680 0 -645]
+}
+coordIndex [
+0, 15, 14, -1, 14, 13, 12, -1, 0, 14, 12, -1, 0, 12, 11, -1, 
+10, 9, 8, -1, 8, 7, 6, -1, 8, 6, 5, -1, 10, 8, 5, -1, 11, 10, 5, -1, 
+0, 11, 5, -1, 0, 5, 4, -1, 4, 3, 2, -1, 0, 4, 2, -1, 0, 2, 1, -1]
+}
+}
+]
+}
+DEF Futra Transform {
+translation 950 104.2 15
+children [
+]
+}
+DEF DvereA Transform {
+translation 950 103.3 35
+children [
+DEF SklaA Transform {
+translation 3.958 38 0
+children [
+]
+}
+]
+}
+DEF Kvetinac_hlina Transform {
+translation 1333 10.25 -163
+children [
+]
+}
+DEF Televize Transform {
+translation 240.1 125 -11.17
+rotation 0 -1 0 -3.142
+children [
+DEF Televize-TIMER TimeSensor { loop TRUE cycleInterval 3.333 },
+]
+}
+DEF ProxSensor01 Transform {
+translation 497.6 0.005 -350
+children [
+]
+}
+DEF Obraz Transform {
+translation 1259 125 -696.1
+children [
+DEF Obraz-TIMER TimeSensor { loop TRUE cycleInterval 3.333 },
+]
+}
+DEF Vypinac_svetlo Transform {
+translation 873.2 128.8 -0.5
+children [
+Transform {
+translation 0 7.5 0
+children [
+Shape {
+appearance Appearance {
+material Material {
+diffuseColor 0.6902 0.102 0.102
+}
+}
+geometry Box { size 15 15 1 }
+}
+] }
+]
+}

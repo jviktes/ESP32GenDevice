@@ -1,0 +1,95 @@
+#VRML V2.0 utf8
+
+# Produced by 3D Studio MAX VRML97 exporter, Version 6, Revision 0,56
+# MAX File: Stìny_s TV.max, Date: Sun Feb 20 14:11:30 2005
+
+DEF Camera01 Viewpoint {
+position 938.5 264.1 154
+orientation 0.9667 0.2149 -0.1389 -0.7951
+fieldOfView 0.9014
+description "Camera01"
+}
+DEF Camera02 Viewpoint {
+position 895.9 163.9 -341.8
+orientation 0.03651 -0.9988 -0.03204 -1.615
+fieldOfView 0.6024
+description "Camera02"
+}
+DEF Layout Transform {
+translation 750 0 -200
+children [
+]
+}
+DEF Futra Transform {
+translation 950 104.2 15
+children [
+]
+}
+DEF DvereA Transform {
+translation 950 103.3 35
+children [
+DEF SklaA Transform {
+translation 3.958 38 0
+children [
+]
+}
+]
+}
+DEF Kvetinac_hlina Transform {
+translation 1333 10.25 -163
+children [
+]
+}
+DEF Televize Transform {
+translation 240.1 125 -11.17
+rotation 0 -1 0 -3.142
+children [
+DEF Televize-TIMER TimeSensor { loop TRUE cycleInterval 3.333 },
+]
+}
+DEF ProxSensor01 Transform {
+translation 497.6 0.005 -350
+children [
+]
+}
+DEF Obraz Transform {
+translation 1259 125 -696.1
+children [
+DEF Obraz-TIMER TimeSensor { loop TRUE cycleInterval 3.333 },
+DEF Plocha_obrazu Transform {
+translation 0 -76.82 3.404
+scale 0.9038 0.9038 0.9038
+children [
+Transform {
+translation 0 85 0
+children [
+Shape {
+appearance Appearance {
+material Material {
+diffuseColor 0.8784 0.5608 0.3412
+}
+}
+geometry Box { size 200 170 1 }
+}
+] }
+]
+},
+DEF Ram Transform {
+translation 0 -85 -1.356
+children [
+Transform {
+translation 0 85 0
+children [
+Shape {
+appearance Appearance {
+material Material {
+diffuseColor 0.3412 0.8784 0.5608
+}
+}
+geometry Box { size 200 170 5 }
+}
+] }
+]
+}
+]
+}

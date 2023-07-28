@@ -1,0 +1,74 @@
+#VRML V2.0 utf8
+
+# Produced by 3D Studio MAX VRML97 exporter, Version 6, Revision 0,56
+# MAX File: Stìny_s TV01.max, Date: Sun Feb 20 14:49:20 2005
+
+DEF Camera01 Viewpoint {
+position 951 125.4 201.1
+orientation 0.7892 0.6137 -0.02411 -0.09949
+fieldOfView 0.9014
+description "Camera01"
+}
+DEF Camera02 Viewpoint {
+position 911.9 211.4 -326
+orientation 0 -1 0 -1.571
+fieldOfView 0.6024
+description "Camera02"
+}
+DEF FDirect01 DirectionalLight {
+intensity 2
+color 1 1 1
+direction 0 -1 0
+on TRUE
+}
+DEF Omni01 PointLight {
+intensity 2
+color 1 1 1
+location 957.1 0 152.6
+on TRUE
+radius 1910
+}
+NavigationInfo { headlight FALSE }
+DEF Layout Transform {
+translation 750 0 -200
+children [
+]
+}
+DEF Futra Transform {
+translation 950 104.2 15
+children [
+]
+}
+DEF DvereA Transform {
+translation 950 103.3 35
+children [
+DEF SklaA Transform {
+translation 3.958 38 0
+children [
+]
+}
+]
+}
+DEF Kvetinac_hlina Transform {
+translation 1333 10.25 -163
+children [
+]
+}
+DEF Televize Transform {
+translation 240.1 125 -11.17
+rotation 0 -1 0 -3.142
+children [
+DEF Televize-TIMER TimeSensor { loop TRUE cycleInterval 3.333 },
+]
+}
+DEF ProxSensor01 Transform {
+translation 497.6 0.005 -350
+children [
+]
+}
+DEF Obraz Transform {
+translation 1259 125 -696.1
+children [
+DEF Obraz-TIMER TimeSensor { loop TRUE cycleInterval 3.333 },
+]
+}

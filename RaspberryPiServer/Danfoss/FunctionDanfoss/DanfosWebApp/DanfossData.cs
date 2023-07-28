@@ -5,9 +5,15 @@ namespace DanfosWebApp
     public class DanfossData
     {
 
+        
+
         // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
         public class Result
         {
+            public String Datav2 { get; set; }
+
+            //public Dictionary<string, string> Datav2 { get; set; }
+
             [JsonProperty("active_time")]
             public int ActiveTime { get; set; }
 
@@ -46,6 +52,8 @@ namespace DanfosWebApp
 
             [JsonProperty("t")]
             public long T { get; set; }
+
+            
         }
 
         public class Status
