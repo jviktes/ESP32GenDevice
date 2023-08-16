@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>My 3D Model with A-Frame</title>
+  
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="https://rawgit.com/ngokevin/aframe-animation-component/master/dist/aframe-animation-component.min.js"></script>
+
+  <script src="https://unpkg.com/aframe-event-set-component@3.0.3/dist/aframe-event-set-component.min.js"></script>
+  <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.loaders.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.0.1/mqtt.min.js"></script>
+
+  <script>
+    AFRAME.registerComponent('change-color-on-click', {
+      // Could use a schem to preserve the color! then simply change it on update
+      // if clicked?
+      init: function () {
+        var COLORS = [
+          'pink',
+          //'blue',
+          'yellow',
+          'red',
+          'peachpuff',
+          '#2EAFAC',
+          '#BAE',
+        ];
+        this.el.addEventListener('click', function (evt) {
+          var randomIndex = Math.floor(Math.random() * COLORS.length);
+          var newColor = COLORS[randomIndex];
+          this.setAttribute('material', 'color', newColor);
+          console.log('I was clicked at: ', evt.detail.intersection.point, 'and my new color is: ', newColor);
+        });
+      },
+    });
+
+    AFRAME.registerComponent('light-on', {
+
+      init: function () {
+        this.el.addEventListener('click', function (evt) {
+
+          this.setAttribute('material', 'color', 'yellow');
+          SwitchOn();
+          console.log('I was clicked at: ', evt.detail.intersection.point);
+        });
+      },
+    });
+
+    AFRAME.registerComponent('light-off', {
+        init: function () {
+        this.el.addEventListener('click', function (evt) {
+
+            this.setAttribute('material', 'color', 'black');
+            SwitchOff();
+            console.log('I was clicked at: ', evt.detail.intersection.point);
+        });
+        },
+    });
+
+  </script>
+
+  <script>
+  AFRAME.registerComponent('cursor-listener', {
+    init: function () {
+        var el = this.el;
+        console.log("wwwcursor-listener on myModelSkrin3!");
+        el.addEventListener('click', function () {
+            // Your custom code to run when the entity is clicked
+            console.log("Clicked on myModelSkrin3!");
+            // Add your desired functionality here
+        });
+    }
+    });
+
+    </script>
+
+<script>
+    AFRAME.registerComponent('change-color-on-hover', {
+      schema: {
+        color: {default: 'red'}
+      },
+  
+      init: function () {
+        var data = this.data;
+        var el = this.el;  // <a-box>
+        var defaultColor = el.getAttribute('material').color;
+            console.log("change-color-on-hover init...");
+        el.addEventListener('mouseenter', function () {
+          el.setAttribute('color', data.color);
+        });
+  
+        el.addEventListener('mouseleave', function () {
+          el.setAttribute('color', defaultColor);
+        });
+        el.addEventListener('click', function () {
+          el.setAttribute('color', defaultColor);
+        });
+      }
+    });
+  </script>
+
+  <style>
+    .my-scene {
+        width: 800px;   /* Set your desired width */
+        height: 600px;  /* Set your desired height */
+    }
+  </style>
+</head>  
+<body>
+
+    <div style="position: absolute;left: 100px;bottom: 20px;">
+        <h1>MQTT Client Example</h1>
+        <button type="button" onclick="Run()">Start mqtt</button>
+        <div id="messages"></div>
+        </div>
+    </button></div>
+
+  <a-scene class="my-scene">
+
+  <a-assets>
+
+<a-asset-item id="myModel" src="byt_v1.obj"></a-asset-item>
+<a-asset-item id="myModelMtl" src="byt_v1.mtl"></a-asset-item>
+
+ <a-asset-item id="myModelKomodaMtl" src="Komoda.mtl"></a-asset-item>
+ <a-asset-item id="myModelKomoda" src="Komoda.obj"></a-asset-item>
+
+<a-asset-item id="myModelSkrin3Mtl" src="Skrin3.mtl"></a-asset-item>
+<a-asset-item id="myModelSkrin3" src="Skrin3.obj"></a-asset-item>
+
+<a-asset-item id="myModelvypinacOffMtl" src="vypinacOff.mtl"></a-asset-item>
+<a-asset-item id="myModelvypinacOff" src="vypinacOff.obj"></a-asset-item>
+
+<a-asset-item id="myModelZlodejMtl" src="Zlodej.mtl"></a-asset-item>
+<a-asset-item id="myModelZlodej" src="Zlodej.obj"></a-asset-item>
+
+<a-asset-item id="myModelVolha_TVMtl" src="Volha_TV.mtl"></a-asset-item>
+<a-asset-item id="myModelVolha_TV" src="Volha_TV.obj"></a-asset-item>
+
+<a-asset-item id="myModelinteriorMtl" src="interior.mtl"></a-asset-item>
+<a-asset-item id="myModelinterior" src="interior.obj"></a-asset-item>
+
+</a-assets>
+
+<!--
+<a-entity id="myModelEntity" change-color-on-click=""
+    obj-model="obj: #myModelSkrin3; mtl: #myModelSkrin3Mtl" cursor-listener>
+ </a-entity>
+
+  <a-entity id="myModelKomoda" light-on
+    obj-model="obj: #myModelKomoda; mtl: #myModelKomodaMtl">
+  </a-entity>
+
+  <a-entity id="myModelvypinacOff" light-off
+    obj-model="obj: #myModelvypinacOff; mtl: #myModelvypinacOffMtl">
+   </a-entity>
+
+   <a-entity id="myModelEntityZlodejEntity" visible=false
+   obj-model="obj: #myModelZlodej; mtl: #myModelZlodejMtl">
+  </a-entity>
+
+   <a-entity id="myModelVolha_TVEntity" visible=true
+   obj-model="obj: #myModelVolha_TV; mtl: #myModelVolha_TVMtl">
+  </a-entity>
+
+
+  <a-entity 
+    obj-model="obj: #myModel; mtl: #myModelMtl">
+  </a-entity>
+
+  <a-entity id="obycejnaZelenaKrabice" change-color-on-click="" light-on >
+  <a-box  position="-1 0.5 -3" rotation="0 45 0" color="green"></a-box>
+    </a-entity>
+
+  <a-camera position="2 1 -3" rotation="0 0 0">
+    <a-cursor geometry="primitive: ring" material="color: #FFC0CB;shader: flat"></a-cursor>
+  </a-camera>
+-->
+<a-entity id="myModelinteriorEntity" visible=true
+obj-model="obj: #myModelinterior; mtl: #myModelinteriorMtl">
+</a-entity>
+
+<a-camera position="200 100 180" rotation="0 0 0">
+  <a-cursor geometry="primitive: ring" material="color: #FFC0CB;shader: flat"></a-cursor>
+</a-camera>
+
+</a-scene>
+
+</div>
+
+      <script>
+
+        let mqttClient;
+        
+        function SwitchOff() {
+            const mqttTopic = 'esp32/light'; // Replace with your MQTT topic
+            let _payload='off';
+            
+            mqttClient.publish(mqttTopic, _payload, { qos: 0, retain: false }, function (error) {
+                if (error) {
+                    console.log(error)
+                } else {
+                    console.log('Published')
+                }
+            }
+            );
+        }
+        
+        function SwitchOn() {
+            const mqttTopic = 'esp32/light'; // Replace with your MQTT topic
+            let _payload='on';
+            
+            mqttClient.publish(mqttTopic, _payload, { qos: 0, retain: false }, function (error) {
+                if (error) {
+                    console.log(error)
+                } else {
+                    console.log('Published')
+                }
+            }
+            );
+            
+        }
+        
+        function Run(){
+        console.log("connecting...");
+        const messagesDiv = document.getElementById('messages');
+        handleMQTTMessage("topicX","connecting...");
+        //mqttClient.publish("htmlclient","connecting...");
+        // Set up MQTT client
+          try {
+            mqttClient = mqtt.connect('ws://192.168.0.136:9001'); // Replace with your MQTT broker address
+          } catch (error) {
+            console.log("Nejak problem s mašinou:");
+            console.log(error);
+          }
+          handleMQTTMessage("topicX","connected.");
+          mqttClient.publish("htmlclient","connected.");
+         console.log("connected.");
+        // Set up MQTT topic
+        const mqttTopic = 'esp32pir/pir'; // Replace with your MQTT topic
+        
+        // Get the messages div element
+
+        // Function to handle incoming MQTT messages
+        function handleMQTTMessage(topic, message) {
+            // Create a new paragraph element to display the message
+            const messageElement = document.createElement('p');
+            messageElement.textContent = message.toString();
+            // Append the message to the messages div
+            messagesDiv.appendChild(messageElement);
+            console.log(message.toString());
+
+            if (message.toString().indexOf("stopped")>=1) {
+                //changeColor("blue");
+                hideZlodej();
+            }
+            if (message.toString().indexOf("detected")>=1) {
+                //changeColor("red");
+                showZlodej();
+            }
+        }
+        
+
+        //pokud je událost na clientovi "message" - prave dorazila nejaka zprava:
+        mqttClient.on('message', handleMQTTMessage);
+        //udalost pri pripojeni:
+        mqttClient.on('connect', function () {
+            console.log('Connected')
+            // Subscribe to a topic
+            mqttClient.subscribe('htmlclient', function (err) {
+                if (!err) {
+                // Publish a message to a topic
+                mqttClient.publish('htmlclient', 'Hello mqtt')
+                }
+            })
+            })
+            mqttClient.subscribe('esp32/light');
+        mqttClient.subscribe('esp32/light');
+        mqttClient.subscribe(mqttTopic);
+        
+        
+    }
+
+        function changeColor() {
+            var entity = document.querySelector('#myModelEntity');
+            entity.setAttribute('material', 'color', 'blue');
+            
+        }
+
+        function showZlodej() {
+            var entity = document.querySelector('#myModelEntityZlodejEntity');
+            entity.setAttribute("visibility",true);
+            entity.setAttribute("visible",true);
+        }
+        function hideZlodej() {
+            var entity = document.querySelector('#myModelEntityZlodejEntity');
+            entity.setAttribute("visible",false);
+            entity.setAttribute("visibility",false);
+        }
+
+        window.addEventListener("load", function(){
+            Run();
+        });
+    </script>
+</body>
+</html>
+
+
