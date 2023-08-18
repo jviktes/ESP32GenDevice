@@ -39,6 +39,22 @@ long duration;
 float distanceCm;
 float distanceInch;
 
+//doba po sobe jsouci stisky:
+const int PERIOD_BETWEEN_ALARMS = 1000;
+static unsigned long lastAlarmTime_btn_pin4 = 0;
+static unsigned long lastAlarmTime_btn_pin0 = 0;
+static unsigned long lastAlarmTime_btn_pin2 = 0;
+// set pin numbers
+const int buttonPin_btn_pin4 = 4;
+const int buttonPin_btn_pin0 = 0;
+const int buttonPin_btn_pin2 = 2;
+
+#define SHORT_PRESS_TIME 500 // 500 milliseconds
+
+// Variables will change:
+int currentState_btn_pin4;     // the current reading from the input pin
+int currentState_btn_pin0; 
+int currentState_btn_pin2; 
 
 AsyncWebServer server(80);
 
@@ -57,6 +73,11 @@ void setup() {
   //echo:
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+
+  // initialize the pushbutton pin as an input
+  pinMode(buttonPin_btn_pin4, INPUT);
+  pinMode(buttonPin_btn_pin0, INPUT);
+  pinMode(buttonPin_btn_pin2, INPUT);
 
   //String responseBasic = "Hi! I am ESP32 on "+String(WiFi.localIP());
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
@@ -240,8 +261,6 @@ if (doc["action"]=="proximity") {
 
 }
 
-
-
 void reconnect() {
   // Loop until we're reconnected
   while (!client.connected()) {
@@ -275,6 +294,57 @@ void loop() {
   StaticJsonDocument<256> data;
   docRoot["sensor_guid"] = uniqueGuid;
   char outJSONData[128];
+
+  //buttons:
+  currentState_btn_pin4 = digitalRead(buttonPin_btn_pin4);
+  currentState_btn_pin0 = digitalRead(buttonPin_btn_pin0);
+  currentState_btn_pin2 = digitalRead(buttonPin_btn_pin2);
+  // check if the pushbutton is pressed.
+  // if it is, the buttonState is HIGH
+  if (currentState_btn_pin4 == HIGH) {
+
+      if(millis() - lastAlarmTime_btn_pin4 >= PERIOD_BETWEEN_ALARMS){
+          Serial.println("publish HIGH");
+          StaticJsonDocument<256> data;
+          data["button1"]="pressed"; //TODO
+          String _topic = uniqueGuid+"/output";
+          char outJSONData[128];
+          GenerateJsonData(data,outJSONData);
+          client.publish(_topic.c_str(),outJSONData);
+
+          lastAlarmTime_btn_pin4=millis();
+      }
+  }
+
+  if (currentState_btn_pin0 == HIGH) {
+
+      if(millis() - lastAlarmTime_btn_pin0 >= PERIOD_BETWEEN_ALARMS){
+          Serial.println("publish HIGH");
+          StaticJsonDocument<256> data;
+          data["button2"]="pressed"; //TODO
+          String _topic = uniqueGuid+"/output";
+          char outJSONData[128];
+          GenerateJsonData(data,outJSONData);
+          client.publish(_topic.c_str(),outJSONData);
+
+          lastAlarmTime_btn_pin0=millis();
+      }
+  }
+
+    if (currentState_btn_pin2 == HIGH) {
+
+      if(millis() - lastAlarmTime_btn_pin2 >= PERIOD_BETWEEN_ALARMS){
+          Serial.println("publish HIGH");
+          StaticJsonDocument<256> data;
+          data["button3"]="pressed"; //TODO
+          String _topic = uniqueGuid+"/output";
+          char outJSONData[128];
+          GenerateJsonData(data,outJSONData);
+          client.publish(_topic.c_str(),outJSONData);
+
+          lastAlarmTime_btn_pin2=millis();
+      }
+  }
 
 
   if (pinStatePrevious == LOW && pinStateCurrent == HIGH) {   // pin state change: LOW -> HIGH
