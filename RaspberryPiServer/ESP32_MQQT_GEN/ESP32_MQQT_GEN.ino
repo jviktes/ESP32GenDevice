@@ -29,6 +29,17 @@ int pinStatePrevious  = LOW;  // previous state of pin
 //rele
 const int RELAY_PIN = 16; // ESP32 pin GIOP16 connected to the IN pin of relay
 
+//echo
+const int trigPin = 5;
+const int echoPin = 18;
+//define sound speed in cm/uS
+#define SOUND_SPEED 0.034
+#define CM_TO_INCH 0.393701
+long duration;
+float distanceCm;
+float distanceInch;
+
+
 AsyncWebServer server(80);
 
 void setup() {
@@ -42,6 +53,10 @@ void setup() {
   //rele:
   pinMode(RELAY_PIN, OUTPUT);
   digitalWrite(RELAY_PIN, LOW);
+
+  //echo:
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
 
   //String responseBasic = "Hi! I am ESP32 on "+String(WiFi.localIP());
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
@@ -61,6 +76,51 @@ void setup() {
   AsyncElegantOTA.begin(&server);    // Start ElegantOTA
   server.begin();
 
+}
+
+void GenerateJsonData(StaticJsonDocument<256> data, char* outResJsonData ) {
+
+  char outJSONDataInternal[128];
+
+    Serial.println("GenerateJsonData...");
+    StaticJsonDocument<256> docRoot;
+    //StaticJsonDocument<256> data;
+    docRoot["sensor_guid"] = uniqueGuid;
+    
+    docRoot["data"] = data;
+    serializeJson(docRoot, outJSONDataInternal);
+
+    //memcpy(outResJsonData, outJSONDataInternal, sizeof(outResJsonData));
+    strncpy(outResJsonData, outJSONDataInternal, sizeof(outJSONDataInternal));
+
+    Serial.println("serializeJson:");
+    Serial.println(outResJsonData);
+    //return outJSONData;
+}
+
+float MeasureProximity() {
+
+// Clears the trigPin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  
+  // Calculate the distance
+  distanceCm = duration * SOUND_SPEED/2;
+  
+  // Convert to inches
+  distanceInch = distanceCm * CM_TO_INCH;
+  
+  // Prints the distance in the Serial Monitor
+  Serial.print("Distance (cm): ");
+  Serial.println(distanceCm);
+  return distanceCm;
 }
 
 void setup_wifi() {
@@ -111,28 +171,41 @@ if (doc["action"]=="set_rele1") {
   if (doc["action_cmd"]=="on") {
       Serial.println("on...");
       digitalWrite(RELAY_PIN, HIGH);
-      
+
+      StaticJsonDocument<256> data;
+      data["action"] =doc["action"];
+      data["action_cmd"] =doc["action_cmd"];
+      data["result"]="OK";
+      String _topic = uniqueGuid+"/output";
+      char outJSONData[128];
+      GenerateJsonData(data,outJSONData);
+      client.publish(_topic.c_str(),outJSONData);      
   }
   if (doc["action_cmd"]=="off") {
       Serial.println("off...");
       digitalWrite(RELAY_PIN, LOW);
+
+      StaticJsonDocument<256> data;
+      data["action"] =doc["action"];
+      data["action_cmd"] =doc["action_cmd"];
+      data["result"]="OK";
+      String _topic = uniqueGuid+"/output";
+      char outJSONData[128];
+      GenerateJsonData(data,outJSONData);
+      client.publish(_topic.c_str(),outJSONData);
   }
 }
 if (doc["action"]=="measure_now") {
     Serial.println("measure_now...");
-    StaticJsonDocument<256> docRoot;
     StaticJsonDocument<256> data;
-    docRoot["sensor_guid"] = uniqueGuid;
-    char outJSONData[128];
     data["pir"] = "true";
     data["temperature"]=125.47;
-    data["huminidy"]=80;
+    data["huminidy"]=666;
     data["action"]="measure_now";
-    docRoot["data"] = data;
-    serializeJson(docRoot, outJSONData);
+    data["proximity"]=MeasureProximity();
     String _topic = uniqueGuid+"/output";
-    Serial.println("measure_now..._topic");
-    Serial.println(_topic);
+    char outJSONData[128];
+    GenerateJsonData(data,outJSONData);
     client.publish(_topic.c_str(),outJSONData);
 }
 if (doc["action"]=="list") {
@@ -153,7 +226,21 @@ if (doc["action"]=="list") {
     Serial.println(_topic);
     client.publish(_topic.c_str(),outJSONData);
 }
+
+if (doc["action"]=="proximity") {
+  
+    StaticJsonDocument<256> data;
+    data["action"]="proximity";
+    data["proximity"]=MeasureProximity();
+    String _topic = uniqueGuid+"/output";
+    char outJSONData[128];
+    GenerateJsonData(data,outJSONData);
+    client.publish(_topic.c_str(),outJSONData);
 }
+
+}
+
+
 
 void reconnect() {
   // Loop until we're reconnected
