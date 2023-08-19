@@ -18,8 +18,8 @@ void WriteTo(int val) {
   Wire.write(val);
   Wire.endTransmission();
 }
-
-void Scanner() {
+//TODO: char * i2cReport
+void Scanner(int * i2cReport ) {
 
   Serial.println();
   Serial.println("I2C scanner. Scanning ...");
@@ -35,6 +35,8 @@ void Scanner() {
       Serial.print(" (0x");
       Serial.print(i, HEX);  // PCF8574 7 bit address
       Serial.println(")");
+      //TODO: i2cReport
+      i2cReport[count]= i;
       count++;
     }
   }

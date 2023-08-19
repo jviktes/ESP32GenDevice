@@ -17,6 +17,8 @@ const char* password = ".MoNitor2?";
 // Add your MQTT Broker IP address, example:
 const char* mqtt_server = "192.168.0.136";
 
+const int messageSize = 256;
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 long lastMsg = 0;
@@ -51,40 +53,29 @@ int enabled_button_mask_20[8] = { 1, 1, 1, 1, 0, 0, 0, 0 };
 #define addr_21 0x21
 #define addr_20 0x20
 
+//water:
+#define POWER_PIN  17 // ESP32 pin GPIO17 connected to sensor's VCC pin
+#define SIGNAL_PIN 34 // ESP32 pin GPIO36 (ADC0) connected to sensor's signal pin
+
+//moisture
+#define MOISTURE_PIN 35 // ESP32 pin GPIO36 (ADC0) connected to sensor's signal pin
+
 Adafruit_BMP280 bmp;
 AsyncWebServer server(80);
 
-void GenerateJsonData(StaticJsonDocument<256> data, char* outResJsonData) {
 
-  char outJSONDataInternal[128];
-
-  Serial.println("GenerateJsonData...");
-  StaticJsonDocument<256> docRoot;
-  //StaticJsonDocument<256> data;
-  docRoot["sensor_guid"] = uniqueGuid;
-
-  docRoot["data"] = data;
-  serializeJson(docRoot, outJSONDataInternal);
-
-  //memcpy(outResJsonData, outJSONDataInternal, sizeof(outResJsonData));
-  strncpy(outResJsonData, outJSONDataInternal, sizeof(outJSONDataInternal));
-
-  Serial.println("serializeJson:");
-  Serial.println(outResJsonData);
-  //return outJSONData;
-}
 void PressedButtonI2C(int pin) {
 
   if (currentState_btn_pin_20[pin] == HIGH) {
 
     if (millis() - lastAlarmTime_btn_pin_20[pin] >= PERIOD_BETWEEN_ALARMS) {
       Serial.println("publish HIGH");
-      StaticJsonDocument<256> data;
+      StaticJsonDocument<messageSize> data;
       data["button_pin_20"] = "pressed";
       data["pin"] = pin;
       data["i2c_address"] = addr_20;
       String _topic = uniqueGuid + "/output";
-      char outJSONData[128];
+      char outJSONData[messageSize];
       GenerateJsonData(data, outJSONData);
       client.publish(_topic.c_str(), outJSONData);
       lastAlarmTime_btn_pin_20[pin] = millis();
@@ -111,8 +102,6 @@ void setup() {
   //Meteo:
   Serial.println(F("BMP280 Forced Mode Test."));
 
-  //Scanner();
-
   if (!bmp.begin(0x76)) {
     Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
                      "try a different address!"));
@@ -124,6 +113,12 @@ void setup() {
                   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
                   Adafruit_BMP280::FILTER_X16,      /* Filtering. */
                   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+
+  WriteTo(0); //reset LED atd.
+
+  //water:
+  pinMode(POWER_PIN, OUTPUT);   // configure pin as an OUTPUT
+  digitalWrite(POWER_PIN, LOW); // low  turn the sensor OFF
 
   //String responseBasic = "Hi! I am ESP32 on "+String(WiFi.localIP());
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
@@ -176,7 +171,7 @@ void callback(char* topic, byte* message, unsigned int length) {
   }
   Serial.println();
 
-  StaticJsonDocument<256> doc;
+  StaticJsonDocument<messageSize> doc;
   deserializeJson(doc, message);
 
   const char* action = doc["action"];
@@ -184,7 +179,7 @@ void callback(char* topic, byte* message, unsigned int length) {
   Serial.println(action);
 
   // Serial.println("serializeJson:");
-  // char out[128];
+  // char out[messageSize];
   // int b =serializeJson(doc, out);
   // Serial.println(out);
 
@@ -193,12 +188,12 @@ void callback(char* topic, byte* message, unsigned int length) {
       Serial.println("on...");
       digitalWrite(RELAY_PIN, HIGH);
 
-      StaticJsonDocument<256> data;
+      StaticJsonDocument<messageSize> data;
       data["action"] = doc["action"];
       data["action_cmd"] = doc["action_cmd"];
       data["result"] = "OK";
       String _topic = uniqueGuid + "/output";
-      char outJSONData[128];
+      char outJSONData[messageSize];
       GenerateJsonData(data, outJSONData);
       client.publish(_topic.c_str(), outJSONData);
     }
@@ -206,35 +201,38 @@ void callback(char* topic, byte* message, unsigned int length) {
       Serial.println("off...");
       digitalWrite(RELAY_PIN, LOW);
 
-      StaticJsonDocument<256> data;
+      StaticJsonDocument<messageSize> data;
       data["action"] = doc["action"];
       data["action_cmd"] = doc["action_cmd"];
       data["result"] = "OK";
       String _topic = uniqueGuid + "/output";
-      char outJSONData[128];
+      char outJSONData[messageSize];
       GenerateJsonData(data, outJSONData);
       client.publish(_topic.c_str(), outJSONData);
     }
   }
   if (doc["action"] == "measure_now") {
     Serial.println("measure_now...");
-    StaticJsonDocument<256> data;
+    StaticJsonDocument<messageSize> data;
     data["pir"] = "true";
     data["temperature"] = 125.47;
     data["huminidy"] = 666;
     data["action"] = "measure_now";
     data["proximity"] = MeasureProximity();
+    data["water"] =ReadWater();
+    data["moisture"] = ReadMoisture();
+
     String _topic = uniqueGuid + "/output";
-    char outJSONData[128];
+    char outJSONData[messageSize];
     GenerateJsonData(data, outJSONData);
     client.publish(_topic.c_str(), outJSONData);
   }
   if (doc["action"] == "list") {
     Serial.println("list of supported operation...");
-    StaticJsonDocument<256> docRoot;
-    StaticJsonDocument<256> data;
+    StaticJsonDocument<messageSize> docRoot;
+    StaticJsonDocument<messageSize> data;
     docRoot["sensor_guid"] = uniqueGuid;
-    char outJSONData[128];
+    char outJSONData[messageSize];
     data["action"] = "true";
     data["temperature"] = 125.47;
     data["huminidy"] = 80;
@@ -250,18 +248,18 @@ void callback(char* topic, byte* message, unsigned int length) {
 
   if (doc["action"] == "proximity") {
 
-    StaticJsonDocument<256> data;
+    StaticJsonDocument<messageSize> data;
     data["action"] = "proximity";
     data["proximity"] = MeasureProximity();
     String _topic = uniqueGuid + "/output";
-    char outJSONData[128];
+    char outJSONData[messageSize];
     GenerateJsonData(data, outJSONData);
     client.publish(_topic.c_str(), outJSONData);
   }
 
   if (doc["action"] == "meteo") {
 
-    StaticJsonDocument<256> data;
+    StaticJsonDocument<messageSize> data;
     data["action"] = "meteo";
 
     float temperature = 0.00;
@@ -284,14 +282,14 @@ void callback(char* topic, byte* message, unsigned int length) {
     data["pressure"] = pressureString;
 
     String _topic = uniqueGuid + "/output";
-    char outJSONData[128];
+    char outJSONData[messageSize];
     GenerateJsonData(data, outJSONData);
     client.publish(_topic.c_str(), outJSONData);
   }
 
   if (doc["action"] == "leds") {
 
-    StaticJsonDocument<256> data;
+    StaticJsonDocument<messageSize> data;
     data["action"] = "leds";
     data["action_cmd"] = doc["action_cmd"];
 
@@ -304,10 +302,34 @@ void callback(char* topic, byte* message, unsigned int length) {
     WriteTo(_data.toInt());
 
     String _topic = uniqueGuid + "/output";
-    char outJSONData[128];
+    char outJSONData[messageSize];
     GenerateJsonData(data, outJSONData);
     client.publish(_topic.c_str(), outJSONData);
   }
+
+  if (doc["action"] == "scanner") {
+
+    StaticJsonDocument<messageSize> data;
+    data["action"] = "scanner";
+    data["action_cmd"] = doc["action_cmd"];
+
+    int i2cReport [20];
+    Scanner(i2cReport);
+
+    char outJSONDataInternalScanner[50];
+    StaticJsonDocument<50> doc;
+    copyArray(i2cReport, doc);
+    serializeJson(doc, outJSONDataInternalScanner);
+
+    data["scanner_data"] = outJSONDataInternalScanner;
+
+    String _topic = uniqueGuid + "/output";
+    char outJSONData[messageSize];
+    GenerateJsonData(data, outJSONData);
+    client.publish(_topic.c_str(), outJSONData);
+  }
+
+  
 }
 
 void reconnect() {
@@ -339,10 +361,10 @@ void loop() {
   pinStatePrevious = pinStateCurrent;            // store old state
   pinStateCurrent = digitalRead(PIN_TO_SENSOR);  // read new state
 
-  StaticJsonDocument<256> docRoot;
-  StaticJsonDocument<256> data;
+  StaticJsonDocument<messageSize> docRoot;
+  StaticJsonDocument<messageSize> data;
   docRoot["sensor_guid"] = uniqueGuid;
-  char outJSONData[128];
+  char outJSONData[messageSize];
 
   //PIR:
   if (pinStatePrevious == LOW && pinStateCurrent == HIGH) {  // pin state change: LOW -> HIGH
