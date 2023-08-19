@@ -6,6 +6,8 @@
 #include <AsyncElegantOTA.h>
 #include <ArduinoJson.h>
 
+#include <Adafruit_BMP280.h>
+
 String uniqueGuid = "esp32_gen_1"; 
 
 // Replace the next variables with your SSID/Password combination
@@ -46,7 +48,7 @@ static unsigned long lastAlarmTime_btn_pin0 = 0;
 static unsigned long lastAlarmTime_btn_pin2 = 0;
 // set pin numbers
 const int buttonPin_btn_pin4 = 4;
-const int buttonPin_btn_pin0 = 0;
+const int buttonPin_btn_pin0 = 15;
 const int buttonPin_btn_pin2 = 2;
 
 #define SHORT_PRESS_TIME 500 // 500 milliseconds
@@ -56,7 +58,35 @@ int currentState_btn_pin4;     // the current reading from the input pin
 int currentState_btn_pin0; 
 int currentState_btn_pin2; 
 
+Adafruit_BMP280 bmp; 
+
+
 AsyncWebServer server(80);
+
+void Scanner() {
+
+    Serial.println ();
+  Serial.println ("I2C scanner. Scanning ...");
+  byte count = 0;
+
+  Wire.begin();
+  for (byte i = 8; i < 120; i++)
+  {
+    Wire.beginTransmission (i);          // Begin I2C transmission Address (i)
+    if (Wire.endTransmission () == 0)  // Receive 0 = success (ACK response) 
+    {
+      Serial.print ("Found address: ");
+      Serial.print (i, DEC);
+      Serial.print (" (0x");
+      Serial.print (i, HEX);     // PCF8574 7 bit address
+      Serial.println (")");
+      count++;
+    }
+  }
+  Serial.print ("Found ");      
+  Serial.print (count, DEC);        // numbers of devices
+  Serial.println (" device(s).");
+}
 
 void setup() {
   Serial.begin(115200);
@@ -78,6 +108,25 @@ void setup() {
   pinMode(buttonPin_btn_pin4, INPUT);
   pinMode(buttonPin_btn_pin0, INPUT);
   pinMode(buttonPin_btn_pin2, INPUT);
+
+  //Meteo:
+  Serial.println(F("BMP280 Forced Mode Test."));
+
+  Scanner();
+  //if (!bmp.begin(BMP280_ADDRESS_ALT, BMP280_CHIPID)) {
+  if (!bmp.begin(0x76)) {
+    Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
+                      "try a different address!"));
+    while (1) delay(10);
+  }
+    /* Default settings from datasheet. */
+  bmp.setSampling(Adafruit_BMP280::MODE_FORCED,     /* Operating Mode. */
+                  Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
+                  Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
+                  Adafruit_BMP280::FILTER_X16,      /* Filtering. */
+                  Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+
+
 
   //String responseBasic = "Hi! I am ESP32 on "+String(WiFi.localIP());
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
@@ -143,6 +192,9 @@ float MeasureProximity() {
   Serial.println(distanceCm);
   return distanceCm;
 }
+
+
+
 
 void setup_wifi() {
   delay(10);
@@ -259,6 +311,36 @@ if (doc["action"]=="proximity") {
     client.publish(_topic.c_str(),outJSONData);
 }
 
+if (doc["action"]=="meteo") {
+  
+    StaticJsonDocument<256> data;
+    data["action"]="meteo";
+    
+    float temperature=0.00;
+    if (bmp.takeForcedMeasurement()) {
+      temperature = bmp.readTemperature();  
+      Serial.println(temperature); 
+      char tempString[8];
+      dtostrf(temperature, 1, 2, tempString);
+      data["temperature"]=tempString;
+    }
+    
+    float pressure = bmp.readPressure();
+    Serial.println(pressure);
+    //Convert the value to a char array
+    char pressureString[16];
+    dtostrf(pressure, 1, 2, pressureString);
+    Serial.print("Pressure: ");
+    Serial.println(pressureString);
+
+    data["pressure"]=pressureString;
+
+    String _topic = uniqueGuid+"/output";
+    char outJSONData[128];
+    GenerateJsonData(data,outJSONData);
+    client.publish(_topic.c_str(),outJSONData);
+  }
+
 }
 
 void reconnect() {
@@ -374,3 +456,6 @@ void loop() {
   }
 
 }
+
+
+
