@@ -31,7 +31,7 @@ int pinStatePrevious  = LOW;  // previous state of pin
 //rele
 const int RELAY_PIN = 16; // ESP32 pin GIOP16 connected to the IN pin of relay
 
-//echo
+//echo distance
 const int trigPin = 5;
 const int echoPin = 18;
 //define sound speed in cm/uS
@@ -43,33 +43,16 @@ float distanceInch;
 
 //doba po sobe jsouci stisky:
 const int PERIOD_BETWEEN_ALARMS = 1000;
-static unsigned long lastAlarmTime_btn_pin4 = 0;
-static unsigned long lastAlarmTime_btn_pin0 = 0;
-static unsigned long lastAlarmTime_btn_pin2 = 0;
-
-
-
-// set pin numbers
-const int buttonPin_btn_pin4 = 4;
-const int buttonPin_btn_pin0 = 15;
-const int buttonPin_btn_pin2 = 2;
-
-#define SHORT_PRESS_TIME 500 // 500 milliseconds
-
-// Variables will change:
-int currentState_btn_pin4;     // the current reading from the input pin
-int currentState_btn_pin0; 
-int currentState_btn_pin2; 
 
 int currentState_btn_pin_20[8];
 long lastAlarmTime_btn_pin_20[8];
-
-Adafruit_BMP280 bmp; 
-
+int enabled_button_mask_20[8]={1,1,1,1,0,0,0,0};
 //I2C
 #define addr_21 0x21
 #define addr_20 0x20
 
+
+Adafruit_BMP280 bmp; 
 AsyncWebServer server(80);
 
 void GenerateJsonData(StaticJsonDocument<256> data, char* outResJsonData ) {
@@ -142,10 +125,9 @@ void ReadFrom(int addr) {
 }
 
 void WriteTo(int val) {  
-Wire.beginTransmission(addr_20);
-Wire.write(val);
-Wire.endTransmission();
-
+  Wire.beginTransmission(addr_20);
+  Wire.write(val);
+  Wire.endTransmission();
 }
 
 
@@ -190,16 +172,11 @@ void setup() {
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
 
-  // initialize the pushbutton pin as an input
-  pinMode(buttonPin_btn_pin4, INPUT);
-  pinMode(buttonPin_btn_pin0, INPUT);
-  pinMode(buttonPin_btn_pin2, INPUT);
-
   //Meteo:
   Serial.println(F("BMP280 Forced Mode Test."));
 
-  Scanner();
-  //if (!bmp.begin(BMP280_ADDRESS_ALT, BMP280_CHIPID)) {
+  //Scanner();
+
   if (!bmp.begin(0x76)) {
     Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
                       "try a different address!"));
@@ -211,8 +188,6 @@ void setup() {
                   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
                   Adafruit_BMP280::FILTER_X16,      /* Filtering. */
                   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
-
-
 
   //String responseBasic = "Hi! I am ESP32 on "+String(WiFi.localIP());
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
@@ -233,7 +208,6 @@ void setup() {
   server.begin();
 
 }
-
 
 
 float MeasureProximity() {
@@ -260,9 +234,6 @@ float MeasureProximity() {
   Serial.println(distanceCm);
   return distanceCm;
 }
-
-
-
 
 void setup_wifi() {
   delay(10);
@@ -299,8 +270,9 @@ void callback(char* topic, byte* message, unsigned int length) {
 
 StaticJsonDocument <256> doc;
 deserializeJson(doc,message);
-Serial.println("action:");
+
 const char* action = doc["action"];
+Serial.println("action:");
 Serial.println(action);
 
 // Serial.println("serializeJson:");
@@ -407,6 +379,42 @@ if (doc["action"]=="meteo") {
     char outJSONData[128];
     GenerateJsonData(data,outJSONData);
     client.publish(_topic.c_str(),outJSONData);
+
+}
+
+if (doc["action"]=="leds") {
+
+    StaticJsonDocument<256> data;
+    data["action"]="leds";
+    data["action_cmd"] = doc["action_cmd"];
+
+    String _data = doc["action_cmd"];
+    char s[8];
+
+    for (int i=0; i< 8; i++)  // for every character in the string  strlen(s) returns the length of a char array
+    {
+        s[i] = _data[i];
+    }
+
+    int value = 0;
+    for (int i=0; i< strlen(s); i++)  // for every character in the string  strlen(s) returns the length of a char array
+    {
+      value *= 2; // double the result so far
+      if (s[i] == '1') value++;  //add 1 if needed
+    }
+
+    Serial.println("s:");
+    Serial.println(s);
+
+    Serial.println("value:");
+    Serial.println(value);
+
+    WriteTo(255);
+
+    String _topic = uniqueGuid+"/output";
+    char outJSONData[128];
+    GenerateJsonData(data,outJSONData);
+    client.publish(_topic.c_str(),outJSONData);
   }
 
 }
@@ -445,61 +453,7 @@ void loop() {
   docRoot["sensor_guid"] = uniqueGuid;
   char outJSONData[128];
 
-  //buttons:
-  currentState_btn_pin4 = digitalRead(buttonPin_btn_pin4);
-  currentState_btn_pin0 = digitalRead(buttonPin_btn_pin0);
-  currentState_btn_pin2 = digitalRead(buttonPin_btn_pin2);
-  // check if the pushbutton is pressed.
-  // if it is, the buttonState is HIGH
-  if (currentState_btn_pin4 == HIGH) {
-
-      if(millis() - lastAlarmTime_btn_pin4 >= PERIOD_BETWEEN_ALARMS){
-          Serial.println("publish HIGH");
-          StaticJsonDocument<256> data;
-          data["button1"]="pressed"; //TODO
-          String _topic = uniqueGuid+"/output";
-          char outJSONData[128];
-          GenerateJsonData(data,outJSONData);
-          client.publish(_topic.c_str(),outJSONData);
-
-          lastAlarmTime_btn_pin4=millis();
-      }
-  }
-
-  if (currentState_btn_pin0 == HIGH) {
-
-      if(millis() - lastAlarmTime_btn_pin0 >= PERIOD_BETWEEN_ALARMS){
-          Serial.println("publish HIGH");
-          StaticJsonDocument<256> data;
-          data["button2"]="pressed"; //TODO
-          String _topic = uniqueGuid+"/output";
-          char outJSONData[128];
-          GenerateJsonData(data,outJSONData);
-          client.publish(_topic.c_str(),outJSONData);
-
-          lastAlarmTime_btn_pin0=millis();
-      }
-  }
-
-    if (currentState_btn_pin2 == HIGH) {
-
-      if(millis() - lastAlarmTime_btn_pin2 >= PERIOD_BETWEEN_ALARMS){
-          Serial.println("publish HIGH");
-          StaticJsonDocument<256> data;
-          data["button3"]="pressed"; //TODO
-          String _topic = uniqueGuid+"/output";
-          char outJSONData[128];
-          GenerateJsonData(data,outJSONData);
-          client.publish(_topic.c_str(),outJSONData);
-
-          lastAlarmTime_btn_pin2=millis();
-      }
-  }
-
-  //Serial.println("ReadFrom:");
-  //delay(500);
-
- 
+  //PIR:
   if (pinStatePrevious == LOW && pinStateCurrent == HIGH) {   // pin state change: LOW -> HIGH
     Serial.println("Motion detected!");
 
@@ -525,7 +479,7 @@ void loop() {
     client.publish(_topic.c_str(),outJSONData);
   }
 
-
+  //I2C bus - buttons:
   char outJSONDataI2C[8]="0000000";
   ReadFrom2(addr_20,outJSONDataI2C);
 
@@ -535,14 +489,13 @@ void loop() {
   //Serial.println();
 
   //read from occupied pins: if = 1 => nothing, if = 0 then pressed
-  if(String(outJSONDataI2C[0])=="0") {currentState_btn_pin_20[0]=HIGH; PressedButtonI2C(0); }
-  else if(String(outJSONDataI2C[1])=="0") {currentState_btn_pin_20[1]=HIGH; PressedButtonI2C(1);  }
-  else if(String(outJSONDataI2C[2])=="0") {currentState_btn_pin_20[2]=HIGH; PressedButtonI2C(2); }
-  else if(String(outJSONDataI2C[3])=="1") {}
-  else if(String(outJSONDataI2C[4])=="1") {currentState_btn_pin_20[4]=HIGH; PressedButtonI2C(4);  }
-  else if(String(outJSONDataI2C[5])=="1") {currentState_btn_pin_20[5]=HIGH; PressedButtonI2C(5); }
-  else if(String(outJSONDataI2C[6])=="0") {currentState_btn_pin_20[6]=HIGH; PressedButtonI2C(6); }
-  else if(String(outJSONDataI2C[7])=="1") {}
+
+  //evaluation values:
+      for(byte i = 0; i < 8; i++) {       
+        if(enabled_button_mask_20[i]==1 && String(outJSONDataI2C[i])=="0") {
+            currentState_btn_pin_20[i]=HIGH; PressedButtonI2C(i); 
+        }
+      }
 
   //reset:
   for(byte i = 0; i < 8; i++) {
