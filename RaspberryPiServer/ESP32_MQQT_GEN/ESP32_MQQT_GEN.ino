@@ -48,10 +48,14 @@ const int PERIOD_BETWEEN_ALARMS = 1000;
 //I2C
 int currentState_btn_pin_20[8];
 long lastAlarmTime_btn_pin_20[8];
-int enabled_button_mask_20[8] = { 1, 1, 1, 1, 0, 0, 0, 0 };
 
-#define addr_21 0x21
-#define addr_20 0x20
+int currentState_btn_pin_24[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+int lastState_btn_pin_24[8]= { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+int enabled_button_mask_20[8] = { 1, 1, 1, 1, 0, 0, 0, 0 };
+int enabled_button_mask_24[8]= { 1, 0, 0, 0, 0, 0, 0, 0 };
+#define addr_stickers 0x21
+#define addr_buttons 0x20
 
 //water:
 #define POWER_PIN  17 // ESP32 pin GPIO17 connected to sensor's VCC pin
@@ -73,13 +77,33 @@ void PressedButtonI2C(int pin) {
       StaticJsonDocument<messageSize> data;
       data["button_pin_20"] = "pressed";
       data["pin"] = pin;
-      data["i2c_address"] = addr_20;
+      data["i2c_address"] = addr_buttons;
       String _topic = uniqueGuid + "/output";
       char outJSONData[messageSize];
       GenerateJsonData(data, outJSONData);
       client.publish(_topic.c_str(), outJSONData);
       lastAlarmTime_btn_pin_20[pin] = millis();
     }
+  }
+}
+
+void PressedStickerI2C(int pin) {
+  
+  if (currentState_btn_pin_24[pin] != lastState_btn_pin_24[pin]) {
+
+    //if (millis() - lastAlarmTime_btn_pin_24[pin] >= PERIOD_BETWEEN_ALARMS) {
+      Serial.println("PressedStickerI2C");
+      StaticJsonDocument<messageSize> data;
+      data["sticker_pin_24"] = "pressed";
+      data["pin"] = pin;
+      data["i2c_address"] = addr_stickers;
+      String _topic = uniqueGuid + "/output";
+      char outJSONData[messageSize];
+      GenerateJsonData(data, outJSONData);
+      client.publish(_topic.c_str(), outJSONData);
+      //lastAlarmTime_btn_pin_20[pin] = millis();
+      lastState_btn_pin_24[pin]=currentState_btn_pin_24[pin];
+    //}
   }
 }
 
@@ -114,8 +138,8 @@ void setup() {
                   Adafruit_BMP280::FILTER_X16,      /* Filtering. */
                   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
 
-  WriteTo(0); //reset LED atd.
-
+  WriteTo(addr_stickers,0); //reset LED atd.
+  WriteTo(addr_buttons,0); //reset LED atd.
   //water:
   pinMode(POWER_PIN, OUTPUT);   // configure pin as an OUTPUT
   digitalWrite(POWER_PIN, LOW); // low  turn the sensor OFF
@@ -299,7 +323,7 @@ void callback(char* topic, byte* message, unsigned int length) {
 
     Serial.println(_data);
 
-    WriteTo(_data.toInt());
+    WriteTo(addr_buttons, _data.toInt());
 
     String _topic = uniqueGuid + "/output";
     char outJSONData[messageSize];
@@ -393,7 +417,7 @@ void loop() {
 
   //I2C bus - buttons:
   char outJSONDataI2C[8] = "0000000";
-  ReadFrom2(addr_20, outJSONDataI2C);
+  ReadFrom2(addr_buttons, outJSONDataI2C);
 
   //read from occupied pins: if = 1 => nothing, if = 0 then pressed
   //evaluation values:
@@ -403,5 +427,19 @@ void loop() {
       PressedButtonI2C(i);
     }
   }
+
+  //I2C bus - stickers:
+  char outJSONDataI2CStickers[8] = "0000000";
+  ReadFrom2(addr_stickers, outJSONDataI2CStickers);
+
+  //read from occupied pins: if = 1 => nothing, if = 0 then pressed
+  //evaluation values:
+  for (byte i = 0; i < 8; i++) {
+    if (enabled_button_mask_24[i] == 1) {
+      currentState_btn_pin_24[i] = outJSONDataI2CStickers[i];
+      PressedStickerI2C(i);
+    }
+  }
+
 
 }

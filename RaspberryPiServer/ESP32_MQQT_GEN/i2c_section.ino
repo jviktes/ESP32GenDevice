@@ -13,8 +13,8 @@ void ReadFrom2(int addr, char* i2cdata) {
   }
 }
 
-void WriteTo(int val) {
-  Wire.beginTransmission(addr_20);
+void WriteTo(int addr, int val) {
+  Wire.beginTransmission(addr);
   Wire.write(val);
   Wire.endTransmission();
 }
