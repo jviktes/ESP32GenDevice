@@ -8,7 +8,7 @@
 
 #include <Adafruit_BMP280.h>
 
-String uniqueGuid = "esp32_gen_1";
+String uniqueGuid = "esp32_prod_1"; //SETUP
 
 // Replace the next variables with your SSID/Password combination
 const char* ssid = "dlink";
@@ -52,8 +52,8 @@ long lastAlarmTime_btn_pin_20[8];
 int currentState_btn_pin_24[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int lastState_btn_pin_24[8]= { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-int enabled_button_mask_20[8] = { 1, 1, 1, 1, 0, 0, 0, 0 };
-int enabled_button_mask_24[8]= { 1, 0, 0, 0, 0, 0, 0, 0 };
+int enabled_button_mask_20[8] = { 0, 0, 0, 0, 0, 0, 0, 0 }; //SETUP
+int enabled_button_mask_24[8]= { 0, 0, 0, 0, 0, 0, 0, 0 };//SETUP
 #define addr_stickers 0x21
 #define addr_buttons 0x20
 
@@ -65,6 +65,7 @@ int enabled_button_mask_24[8]= { 1, 0, 0, 0, 0, 0, 0, 0 };
 #define MOISTURE_PIN 35 // ESP32 pin GPIO36 (ADC0) connected to sensor's signal pin
 
 Adafruit_BMP280 bmp;
+bool bmpEnabled = false;
 AsyncWebServer server(80);
 
 
@@ -106,7 +107,7 @@ void PressedStickerI2C(int pin) {
 
 void setup() {
   Serial.begin(115200);
-
+  
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
@@ -122,18 +123,25 @@ void setup() {
 
   //Meteo:
   Serial.println(F("BMP280 Forced Mode Test."));
-
+  bmpEnabled= false;
   if (!bmp.begin(0x76)) {
     Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
                      "try a different address!"));
-    while (1) delay(10);
+    //while (1) delay(10);
+    bmpEnabled=false;
   }
-  /* Default settings from datasheet. */
+  else {
+    bmpEnabled = true;
+  }
+  if (bmpEnabled) {
+      /* Default settings from datasheet. */
   bmp.setSampling(Adafruit_BMP280::MODE_FORCED,     /* Operating Mode. */
                   Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
                   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
                   Adafruit_BMP280::FILTER_X16,      /* Filtering. */
                   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+  }
+
 
   WriteTo(addr_stickers,0); //reset LED atd.
   WriteTo(addr_buttons,0); //reset LED atd.
@@ -376,26 +384,27 @@ void loop() {
   //PIR:
   if (pinStatePrevious == LOW && pinStateCurrent == HIGH) {  // pin state change: LOW -> HIGH
     Serial.println("Motion detected!");
-
     data["pir"] = "true";
-    data["temperature"] = 125.47;
-    data["huminidy"] = 80;
     docRoot["data"] = data;
 
     serializeJson(docRoot, outJSONData);
     String _topic = uniqueGuid + "/output";
+    Serial.println(_topic);
+Serial.println(outJSONData);
     client.publish(_topic.c_str(), outJSONData);
+    Serial.println("client.publish");
+
   } else if (pinStatePrevious == HIGH && pinStateCurrent == LOW) {  // pin state change: HIGH -> LOW
     Serial.println("Motion stopped!");
 
     data["pir"] = "false";
-    data["temperature"] = 125.47;
-    data["huminidy"] = 80;
     docRoot["data"] = data;
-
     serializeJson(docRoot, outJSONData);
     String _topic = uniqueGuid + "/output";
+Serial.println(_topic);
+Serial.println(outJSONData);
     client.publish(_topic.c_str(), outJSONData);
+    Serial.println("client.publish");
   }
 
   //I2C bus - buttons:

@@ -46,18 +46,23 @@ int ReadWater() {
 }
 float ReadTemperature () {
     float temperature = 0.00;
-    if (bmp.takeForcedMeasurement()) {
-      temperature = bmp.readTemperature();
-      Serial.print("Temperature: ");
-      Serial.println(temperature);
-      
+    if (bmpEnabled) {
+      if (bmp.takeForcedMeasurement()) {
+        temperature = bmp.readTemperature();
+        Serial.print("Temperature: ");
+        Serial.println(temperature);
+      }
     }
+
     return temperature;
 }
 float ReadPressure () {
-    float pressure = bmp.readPressure();
-    Serial.print("Pressure: ");
-    Serial.println(pressure);
+    float pressure=0.00;
+    if (bmpEnabled) {
+      pressure = bmp.readPressure();
+      Serial.print("Pressure: ");
+      Serial.println(pressure);
+    }
     return pressure;
 }
 
