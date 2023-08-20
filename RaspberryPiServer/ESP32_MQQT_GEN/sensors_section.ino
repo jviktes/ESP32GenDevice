@@ -44,3 +44,20 @@ int ReadWater() {
   Serial.println(waterValue);
   return waterValue;
 }
+float ReadTemperature () {
+    float temperature = 0.00;
+    if (bmp.takeForcedMeasurement()) {
+      temperature = bmp.readTemperature();
+      Serial.print("Temperature: ");
+      Serial.println(temperature);
+      
+    }
+    return temperature;
+}
+float ReadPressure () {
+    float pressure = bmp.readPressure();
+    Serial.print("Pressure: ");
+    Serial.println(pressure);
+    return pressure;
+}
+

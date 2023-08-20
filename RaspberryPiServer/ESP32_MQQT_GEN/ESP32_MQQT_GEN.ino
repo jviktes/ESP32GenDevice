@@ -91,7 +91,6 @@ void PressedStickerI2C(int pin) {
   
   if (currentState_btn_pin_24[pin] != lastState_btn_pin_24[pin]) {
 
-    //if (millis() - lastAlarmTime_btn_pin_24[pin] >= PERIOD_BETWEEN_ALARMS) {
       Serial.println("PressedStickerI2C");
       StaticJsonDocument<messageSize> data;
       data["sticker_pin_24"] = "pressed";
@@ -101,9 +100,7 @@ void PressedStickerI2C(int pin) {
       char outJSONData[messageSize];
       GenerateJsonData(data, outJSONData);
       client.publish(_topic.c_str(), outJSONData);
-      //lastAlarmTime_btn_pin_20[pin] = millis();
       lastState_btn_pin_24[pin]=currentState_btn_pin_24[pin];
-    //}
   }
 }
 
@@ -235,16 +232,19 @@ void callback(char* topic, byte* message, unsigned int length) {
       client.publish(_topic.c_str(), outJSONData);
     }
   }
+
   if (doc["action"] == "measure_now") {
     Serial.println("measure_now...");
     StaticJsonDocument<messageSize> data;
     data["pir"] = "true";
-    data["temperature"] = 125.47;
+   
     data["huminidy"] = 666;
     data["action"] = "measure_now";
     data["proximity"] = MeasureProximity();
     data["water"] =ReadWater();
     data["moisture"] = ReadMoisture();
+    data["temperature"] = ReadTemperature();
+    data["pressure"] = ReadPressure();
 
     String _topic = uniqueGuid + "/output";
     char outJSONData[messageSize];
@@ -285,25 +285,8 @@ void callback(char* topic, byte* message, unsigned int length) {
 
     StaticJsonDocument<messageSize> data;
     data["action"] = "meteo";
-
-    float temperature = 0.00;
-    if (bmp.takeForcedMeasurement()) {
-      temperature = bmp.readTemperature();
-      Serial.println(temperature);
-      char tempString[8];
-      dtostrf(temperature, 1, 2, tempString);
-      data["temperature"] = tempString;
-    }
-
-    float pressure = bmp.readPressure();
-    Serial.println(pressure);
-    //Convert the value to a char array
-    char pressureString[16];
-    dtostrf(pressure, 1, 2, pressureString);
-    Serial.print("Pressure: ");
-    Serial.println(pressureString);
-
-    data["pressure"] = pressureString;
+    data["temperature"] = ReadTemperature();
+    data["pressure"] = ReadPressure();
 
     String _topic = uniqueGuid + "/output";
     char outJSONData[messageSize];
