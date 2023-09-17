@@ -8,7 +8,7 @@
 
 #include <Adafruit_BMP280.h>
 
-String uniqueGuid = "esp32_prod_1"; //SETUP
+String uniqueGuid = "esp32_prod_4"; //SETUP
 
 // Replace the next variables with your SSID/Password combination
 const char* ssid = "dlink";
@@ -25,7 +25,7 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 
-const int PIN_TO_SENSOR = 19;  // GIOP19 pin connected to OUTPUT pin of sensor
+const int PIN_TO_SENSOR = 19;  // pin 19 connected to OUTPUT pin of sensor
 int pinStateCurrent = LOW;     // current state of pin
 int pinStatePrevious = LOW;    // previous state of pin
 
